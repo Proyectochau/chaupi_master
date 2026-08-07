@@ -67,7 +67,9 @@ double get totalMateriales {
 
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('AGREGAR MATERIAL'),
                 onPressed: () {
   setState(() {
     materiales.add(
@@ -83,7 +85,6 @@ double get totalMateriales {
   cantidadController.clear();
   precioController.clear();
 },
-                child: const Text('AGREGAR MATERIAL'),
               ),
             ),
 
