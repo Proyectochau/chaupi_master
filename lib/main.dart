@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/materiales_page.dart';
+import 'pages/mano_obra_page.dart';
 void main() {
   runApp(const ChaupiMasterApp());
 }
@@ -287,7 +287,9 @@ SizedBox(
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const MaterialesPage(),
+                      builder: (_) => ManoObraPage(
+                        tipoTrabajo: widget.tipoTrabajo,
+                      ),
                     ),
                   );
                 },
