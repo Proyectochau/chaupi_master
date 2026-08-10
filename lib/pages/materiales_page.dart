@@ -100,6 +100,23 @@ double get totalMateriales {
 ),        
 
 const SizedBox(height: 20),
+SizedBox(
+  width: double.infinity,
+  child: ElevatedButton.icon(
+    onPressed: () {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Presupuesto guardado correctamente'),
+        ),
+      );
+    },
+    icon: const Icon(Icons.save),
+    label: const Text('GUARDAR PRESUPUESTO'),
+  ),
+),
+
+const SizedBox(height: 20),
+
 
 ListView.builder(
   shrinkWrap: true,
