@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'pages/materiales_page.dart';
 void main() {
   runApp(const ChaupiMasterApp());
@@ -141,7 +140,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
             const SizedBox(height: 20),
 
             DropdownButtonFormField<String>(
-              value: tipoTrabajo,
+              initialValue: tipoTrabajo,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Tipo de trabajo',
@@ -355,13 +354,12 @@ class _ActionCard extends StatelessWidget {
   final String subtitle;
   final VoidCallback? onTap;
 
-  const _ActionCard({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.onTap,
-  });
+ const _ActionCard({
+  required this.icon,
+  required this.title,
+  required this.subtitle,
+  this.onTap,
+});
 
   @override
   Widget build(BuildContext context) {
