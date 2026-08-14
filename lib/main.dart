@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'pages/materiales_page.dart';
+import 'pages/mano_obra_page.dart';
+import 'models/presupuesto.dart';
+import 'pages/ferreterias_page.dart';
 void main() {
   runApp(const ChaupiMasterApp());
 }
@@ -72,6 +73,14 @@ class WelcomePage extends StatelessWidget {
     icon: Icons.storefront_outlined,
     title: 'Ferreterías y materiales',
     subtitle: 'Busca proveedores y productos.',
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const FerreteriasPage(),
+        ),
+      );
+    },
   ),
             const Spacer(),
             SizedBox(
@@ -141,7 +150,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
             const SizedBox(height: 20),
 
             DropdownButtonFormField<String>(
-              value: tipoTrabajo,
+              initialValue: tipoTrabajo,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Tipo de trabajo',
@@ -167,11 +176,12 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
     onPressed: tipoTrabajo == null
         ? null
         : () {
+            final presupuesto = Presupuesto(tipoTrabajo: tipoTrabajo!);
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => DetalleTrabajoPage(
-                  tipoTrabajo: tipoTrabajo!,
+                  presupuesto: presupuesto,
                 ),
               ),
             );
@@ -186,18 +196,44 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
   }
 }
 class DetalleTrabajoPage extends StatefulWidget {
-  final String tipoTrabajo;
+  final Presupuesto presupuesto;
 
   const DetalleTrabajoPage({
     super.key,
-    required this.tipoTrabajo,
+    required this.presupuesto,
   });
 @override
 State<DetalleTrabajoPage> createState() => _DetalleTrabajoPageState();
 }
 
 class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
-DateTime? fechaInicio;
+  final TextEditingController descripcionController = TextEditingController();
+  final TextEditingController ubicacionController = TextEditingController();
+  final TextEditingController clienteController = TextEditingController();
+  final TextEditingController telefonoController = TextEditingController();
+
+  DateTime? fechaInicio;
+
+  @override
+  void initState() {
+    super.initState();
+    // preload existing values if any
+    descripcionController.text = widget.presupuesto.descripcion ?? '';
+    ubicacionController.text = widget.presupuesto.ubicacion ?? '';
+    clienteController.text = widget.presupuesto.clienteNombre ?? '';
+    telefonoController.text = widget.presupuesto.telefono ?? '';
+    fechaInicio = widget.presupuesto.fechaInicio;
+  }
+
+  @override
+  void dispose() {
+    descripcionController.dispose();
+    ubicacionController.dispose();
+    clienteController.dispose();
+    telefonoController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,7 +246,7 @@ DateTime? fechaInicio;
         child: Column(
           children: [
             Text(
-            'Trabajo: ${widget.tipoTrabajo}',
+            'Trabajo: ${widget.presupuesto.tipoTrabajo}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -219,8 +255,9 @@ DateTime? fechaInicio;
 
             const SizedBox(height: 20),
 
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: descripcionController,
+              decoration: const InputDecoration(
                 labelText: 'Descripción del trabajo',
                 border: OutlineInputBorder(),
               ),
@@ -228,8 +265,9 @@ DateTime? fechaInicio;
 
             const SizedBox(height: 15),
 
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: ubicacionController,
+              decoration: const InputDecoration(
                 labelText: 'Ubicación',
                 border: OutlineInputBorder(),
               ),
@@ -237,17 +275,19 @@ DateTime? fechaInicio;
 
             const SizedBox(height: 15),
 
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: clienteController,
+              decoration: const InputDecoration(
                 labelText: 'Nombre del cliente',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 15),
 
-const TextField(
+TextField(
+  controller: telefonoController,
   keyboardType: TextInputType.phone,
-  decoration: InputDecoration(
+  decoration: const InputDecoration(
     labelText: 'Teléfono del cliente',
     border: OutlineInputBorder(),
   ),
@@ -261,7 +301,7 @@ TextField(
     ? 'Fecha estimada de inicio'
     : 'Inicio: ${fechaInicio!.day}/${fechaInicio!.month}/${fechaInicio!.year}',
     border: OutlineInputBorder(),
-    suffixIcon: Icon(Icons.calendar_today),
+    suffixIcon: const Icon(Icons.calendar_today),
   ),
   onTap: () async {
     final fecha = await showDatePicker(
@@ -285,10 +325,19 @@ SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  // save fields into presupuesto
+                  widget.presupuesto.descripcion = descripcionController.text.trim();
+                  widget.presupuesto.ubicacion = ubicacionController.text.trim();
+                  widget.presupuesto.clienteNombre = clienteController.text.trim();
+                  widget.presupuesto.telefono = telefonoController.text.trim();
+                  widget.presupuesto.fechaInicio = fechaInicio;
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const MaterialesPage(),
+                      builder: (_) => ManoObraPage(
+                        presupuesto: widget.presupuesto,
+                      ),
                     ),
                   );
                 },
@@ -355,13 +404,12 @@ class _ActionCard extends StatelessWidget {
   final String subtitle;
   final VoidCallback? onTap;
 
-  const _ActionCard({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.onTap,
-  });
+ const _ActionCard({
+  required this.icon,
+  required this.title,
+  required this.subtitle,
+  this.onTap,
+});
 
   @override
   Widget build(BuildContext context) {
