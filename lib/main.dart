@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/mano_obra_page.dart';
+import 'pages/ferreterias_page.dart';
 void main() {
   runApp(const ChaupiMasterApp());
 }
@@ -71,6 +72,14 @@ class WelcomePage extends StatelessWidget {
     icon: Icons.storefront_outlined,
     title: 'Ferreterías y materiales',
     subtitle: 'Busca proveedores y productos.',
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const FerreteriasPage(),
+        ),
+      );
+    },
   ),
             const Spacer(),
             SizedBox(
