@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/mano_obra.dart';
+import '../models/presupuesto.dart';
 import 'materiales_page.dart';
 
 class ManoObraPage extends StatefulWidget {
-  final String tipoTrabajo;
+  final Presupuesto presupuesto;
 
-  const ManoObraPage({super.key, required this.tipoTrabajo});
+  const ManoObraPage({super.key, required this.presupuesto});
 
   @override
   State<ManoObraPage> createState() => _ManoObraPageState();
@@ -17,11 +18,11 @@ class _ManoObraPageState extends State<ManoObraPage> {
   final TextEditingController diasController = TextEditingController();
   final TextEditingController precioController = TextEditingController();
 
-  final List<ManoObraItem> integrantes = [];
+  late List<ManoObraItem> integrantes;
   String categoriaActual = 'Trabajador';
 
   double get totalManoObra {
-    return integrantes.fold(0, (sum, item) => sum + item.subtotal);
+    return widget.presupuesto.totalManoObra;
   }
 
   void agregarIntegrante() {
@@ -40,21 +41,39 @@ class _ManoObraPageState extends State<ManoObraPage> {
     }
 
     setState(() {
-      integrantes.add(
-        ManoObraItem(
-          descripcion: descripcion,
-          tipo: funcion,
-          categoria: categoriaActual,
-          dias: dias,
-          precioDia: precio,
-        ),
+      final item = ManoObraItem(
+        descripcion: descripcion,
+        tipo: funcion,
+        categoria: categoriaActual,
+        dias: dias,
+        precioDia: precio,
       );
+      integrantes.add(item);
+      // also add to presupuesto (same list reference)
+      if (!widget.presupuesto.manoObra.contains(item)) {
+        widget.presupuesto.manoObra.add(item);
+      }
       descripcionController.clear();
       funcionController.clear();
       diasController.clear();
       precioController.clear();
       categoriaActual = 'Trabajador';
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    integrantes = widget.presupuesto.manoObra;
+  }
+
+  @override
+  void dispose() {
+    descripcionController.dispose();
+    funcionController.dispose();
+    diasController.dispose();
+    precioController.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,7 +89,7 @@ class _ManoObraPageState extends State<ManoObraPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Trabajo: ${widget.tipoTrabajo}',
+              'Trabajo: ${widget.presupuesto.tipoTrabajo}',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
@@ -191,7 +210,7 @@ class _ManoObraPageState extends State<ManoObraPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const MaterialesPage(),
+                      builder: (_) => MaterialesPage(presupuesto: widget.presupuesto),
                     ),
                   );
                 },

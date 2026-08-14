@@ -1,26 +1,44 @@
 import 'package:flutter/material.dart';
 import '../models/material.dart';
+import '../models/presupuesto.dart';
+import 'resumen_presupuesto_page.dart';
+
 class MaterialesPage extends StatefulWidget {
-  const MaterialesPage({super.key});
+  final Presupuesto? presupuesto;
+
+  const MaterialesPage({super.key, this.presupuesto});
 @override
 State<MaterialesPage> createState() => _MaterialesPageState();
 }
 
 class _MaterialesPageState extends State<MaterialesPage> {
   final TextEditingController materialController = TextEditingController();
-final TextEditingController cantidadController = TextEditingController();
-final TextEditingController precioController = TextEditingController();
+  final TextEditingController cantidadController = TextEditingController();
+  final TextEditingController precioController = TextEditingController();
 
-final List<MaterialItem> materiales = [];
-double get totalMateriales {
-  double total = 0;
+  late List<MaterialItem> materiales;
 
-  for (final material in materiales) {
-    total += material.subtotal;
+  double get totalMateriales {
+    if (widget.presupuesto != null) {
+      return widget.presupuesto!.totalMateriales;
+    }
+
+    return materiales.fold(0, (s, m) => s + m.subtotal);
   }
 
-  return total;
-}
+  @override
+  void initState() {
+    super.initState();
+    materiales = widget.presupuesto?.materiales ?? [];
+  }
+
+  @override
+  void dispose() {
+    materialController.dispose();
+    cantidadController.dispose();
+    precioController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,13 +90,15 @@ double get totalMateriales {
                 label: const Text('AGREGAR MATERIAL'),
                 onPressed: () {
   setState(() {
-    materiales.add(
-  MaterialItem(
-    nombre: materialController.text,
-    cantidad: double.parse(cantidadController.text),
-    precio: double.parse(precioController.text),
-  ),
-);
+    final item = MaterialItem(
+      nombre: materialController.text,
+      cantidad: double.tryParse(cantidadController.text.replaceAll(',', '.')) ?? 0,
+      precio: double.tryParse(precioController.text.replaceAll(',', '.')) ?? 0,
+    );
+    materiales.add(item);
+    if (widget.presupuesto != null && !widget.presupuesto!.materiales.contains(item)) {
+      widget.presupuesto!.materiales.add(item);
+    }
   });
 
   materialController.clear();
@@ -114,6 +134,24 @@ SizedBox(
     label: const Text('GUARDAR PRESUPUESTO'),
   ),
 ),
+
+const SizedBox(height: 12),
+if (widget.presupuesto != null)
+  SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResumenPresupuestoPage(presupuesto: widget.presupuesto!),
+          ),
+        );
+      },
+      icon: const Icon(Icons.summarize),
+      label: const Text('VER RESUMEN'),
+    ),
+  ),
 
 const SizedBox(height: 20),
 
