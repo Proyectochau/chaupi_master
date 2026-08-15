@@ -65,8 +65,9 @@ class ResumenPresupuestoPage extends StatelessWidget {
 
               const Text('RESUMEN ECONÓMICO', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('Mano de obra: \$${presupuesto.totalManoObra.toStringAsFixed(2)}'),
-              Text('Materiales: \$${presupuesto.totalMateriales.toStringAsFixed(2)}'),
+              Text('Total mano de obra: \$${presupuesto.totalManoObra.toStringAsFixed(2)}'),
+              Text('Total materiales: \$${presupuesto.totalMateriales.toStringAsFixed(2)}'),
+              Text('Transporte / Flete: \$${presupuesto.transporte.toStringAsFixed(2)}'),
               const SizedBox(height: 8),
               Text('TOTAL GENERAL: \$${presupuesto.totalGeneral.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
             ],

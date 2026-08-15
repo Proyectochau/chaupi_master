@@ -8,6 +8,7 @@ class Presupuesto {
   String? clienteNombre;
   String? telefono;
   DateTime? fechaInicio;
+  double transporte;
 
   final List<ManoObraItem> manoObra;
   final List<MaterialItem> materiales;
@@ -19,6 +20,7 @@ class Presupuesto {
     this.clienteNombre,
     this.telefono,
     this.fechaInicio,
+    this.transporte = 0.0,
     List<ManoObraItem>? manoObra,
     List<MaterialItem>? materiales,
   })  : manoObra = manoObra ?? [],
@@ -26,5 +28,5 @@ class Presupuesto {
 
   double get totalManoObra => manoObra.fold(0, (s, i) => s + i.subtotal);
   double get totalMateriales => materiales.fold(0, (s, m) => s + m.subtotal);
-  double get totalGeneral => totalManoObra + totalMateriales;
+  double get totalGeneral => totalManoObra + totalMateriales + transporte;
 }
