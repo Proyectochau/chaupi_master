@@ -12,6 +12,7 @@ class Presupuesto {
   String? unidadDuracion;
   String? notasAdicionales;
   double transporte;
+  final List<String> fotosTrabajo;
 
   final List<ManoObraItem> manoObra;
   final List<MaterialItem> materiales;
@@ -27,9 +28,11 @@ class Presupuesto {
     this.unidadDuracion,
     this.notasAdicionales,
     this.transporte = 0.0,
+    List<String>? fotosTrabajo,
     List<ManoObraItem>? manoObra,
     List<MaterialItem>? materiales,
-  })  : manoObra = manoObra ?? [],
+  })  : fotosTrabajo = fotosTrabajo ?? [],
+        manoObra = manoObra ?? [],
         materiales = materiales ?? [];
 
   double get totalManoObra => manoObra.fold(0, (s, i) => s + i.subtotal);

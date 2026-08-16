@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'pages/mano_obra_page.dart';
 import 'models/presupuesto.dart';
 import 'pages/ferreterias_page.dart';
@@ -213,13 +215,16 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
   final TextEditingController telefonoController = TextEditingController();
   final TextEditingController duracionController = TextEditingController();
   final TextEditingController notasController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
   DateTime? fechaInicio;
   String unidadDuracionActual = 'Días';
+  late List<String> fotosTrabajo;
 
   @override
   void initState() {
     super.initState();
+    fotosTrabajo = widget.presupuesto.fotosTrabajo;
     descripcionController.text = widget.presupuesto.descripcion ?? '';
     ubicacionController.text = widget.presupuesto.ubicacion ?? '';
     clienteController.text = widget.presupuesto.clienteNombre ?? '';
@@ -241,6 +246,40 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
     super.dispose();
   }
 
+  Future<void> _tomarFoto() async {
+    final XFile? foto = await _picker.pickImage(source: ImageSource.camera);
+    if (foto == null) {
+      return;
+    }
+
+    setState(() {
+      if (!fotosTrabajo.contains(foto.path)) {
+        fotosTrabajo.add(foto.path);
+      }
+    });
+  }
+
+  Future<void> _seleccionarFotos() async {
+    final List<XFile> imagenes = await _picker.pickMultiImage();
+    if (imagenes.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      for (final imagen in imagenes) {
+        if (!fotosTrabajo.contains(imagen.path)) {
+          fotosTrabajo.add(imagen.path);
+        }
+      }
+    });
+  }
+
+  void _eliminarFoto(String path) {
+    setState(() {
+      fotosTrabajo.remove(path);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -248,7 +287,7 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
         title: const Text('Detalle del Trabajo'),
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
@@ -349,6 +388,87 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 15),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Fotos del trabajo (opcional)',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.camera_alt),
+                    label: const Text('Cámara'),
+                    onPressed: _tomarFoto,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.photo_library),
+                    label: const Text('Galería'),
+                    onPressed: _seleccionarFotos,
+                  ),
+                ),
+              ],
+            ),
+            if (fotosTrabajo.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 110,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: fotosTrabajo.length,
+                  itemBuilder: (context, index) {
+                    final path = fotosTrabajo[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(
+                              File(path),
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: GestureDetector(
+                              onTap: () => _eliminarFoto(path),
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.black54,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
             const SizedBox(height: 15),
             TextField(
               readOnly: true,
