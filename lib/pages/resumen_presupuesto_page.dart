@@ -27,6 +27,9 @@ class ResumenPresupuestoPage extends StatelessWidget {
               Text('Cliente: ${presupuesto.clienteNombre ?? '-'}'),
               Text('Teléfono: ${presupuesto.telefono ?? '-'}'),
               Text('Fecha inicio: ${presupuesto.fechaInicio != null ? '${presupuesto.fechaInicio!.day}/${presupuesto.fechaInicio!.month}/${presupuesto.fechaInicio!.year}' : '-'}'),
+              Text('Duración aproximada: ${presupuesto.duracionAproximada != null && presupuesto.duracionAproximada! > 0 ? '${presupuesto.duracionAproximada! % 1 == 0 ? presupuesto.duracionAproximada!.toStringAsFixed(0) : presupuesto.duracionAproximada!.toStringAsFixed(2)} ${presupuesto.unidadDuracion ?? 'Días'}' : '-'}'),
+              if ((presupuesto.notasAdicionales ?? '').trim().isNotEmpty)
+                Text('Notas adicionales: ${presupuesto.notasAdicionales}'),
               const SizedBox(height: 16),
 
               const Text('MANO DE OBRA', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

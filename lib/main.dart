@@ -211,17 +211,22 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
   final TextEditingController ubicacionController = TextEditingController();
   final TextEditingController clienteController = TextEditingController();
   final TextEditingController telefonoController = TextEditingController();
+  final TextEditingController duracionController = TextEditingController();
+  final TextEditingController notasController = TextEditingController();
 
   DateTime? fechaInicio;
+  String unidadDuracionActual = 'Días';
 
   @override
   void initState() {
     super.initState();
-    // preload existing values if any
     descripcionController.text = widget.presupuesto.descripcion ?? '';
     ubicacionController.text = widget.presupuesto.ubicacion ?? '';
     clienteController.text = widget.presupuesto.clienteNombre ?? '';
     telefonoController.text = widget.presupuesto.telefono ?? '';
+    duracionController.text = widget.presupuesto.duracionAproximada?.toString() ?? '';
+    notasController.text = widget.presupuesto.notasAdicionales ?? '';
+    unidadDuracionActual = widget.presupuesto.unidadDuracion ?? 'Días';
     fechaInicio = widget.presupuesto.fechaInicio;
   }
 
@@ -231,6 +236,8 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
     ubicacionController.dispose();
     clienteController.dispose();
     telefonoController.dispose();
+    duracionController.dispose();
+    notasController.dispose();
     super.dispose();
   }
 
@@ -246,15 +253,13 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
         child: Column(
           children: [
             Text(
-            'Trabajo: ${widget.presupuesto.tipoTrabajo}',
+              'Trabajo: ${widget.presupuesto.tipoTrabajo}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 20),
-
             TextField(
               controller: descripcionController,
               decoration: const InputDecoration(
@@ -262,9 +267,7 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 15),
-
             TextField(
               controller: ubicacionController,
               decoration: const InputDecoration(
@@ -272,9 +275,7 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 15),
-
             TextField(
               controller: clienteController,
               decoration: const InputDecoration(
@@ -283,54 +284,121 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
               ),
             ),
             const SizedBox(height: 15),
-
-TextField(
-  controller: telefonoController,
-  keyboardType: TextInputType.phone,
-  decoration: const InputDecoration(
-    labelText: 'Teléfono del cliente',
-    border: OutlineInputBorder(),
-  ),
-),
+            TextField(
+              controller: telefonoController,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Teléfono del cliente',
+                border: OutlineInputBorder(),
+              ),
+            ),
             const SizedBox(height: 15),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Duración aproximada',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: duracionController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Cantidad',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: unidadDuracionActual,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Unidad',
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Horas', child: Text('Horas')),
+                      DropdownMenuItem(value: 'Días', child: Text('Días')),
+                      DropdownMenuItem(value: 'Semanas', child: Text('Semanas')),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          unidadDuracionActual = value;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: notasController,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'Notas adicionales (opcional)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: fechaInicio == null
+                    ? 'Fecha estimada de inicio'
+                    : 'Inicio: ${fechaInicio!.day}/${fechaInicio!.month}/${fechaInicio!.year}',
+                border: const OutlineInputBorder(),
+                suffixIcon: const Icon(Icons.calendar_today),
+              ),
+              onTap: () async {
+                final fecha = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2030),
+                );
 
-TextField(
-  readOnly: true,
-  decoration:  InputDecoration(
-    labelText: fechaInicio == null
-    ? 'Fecha estimada de inicio'
-    : 'Inicio: ${fechaInicio!.day}/${fechaInicio!.month}/${fechaInicio!.year}',
-    border: OutlineInputBorder(),
-    suffixIcon: const Icon(Icons.calendar_today),
-  ),
-  onTap: () async {
-    final fecha = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-    );
-
-    if (fecha != null) {
-  setState(() {
-    fechaInicio = fecha;
-  });
-}
-  },
-),
-
-const SizedBox(height: 20),
-
-SizedBox(
+                if (fecha != null) {
+                  setState(() {
+                    fechaInicio = fecha;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // save fields into presupuesto
+                  final duracion = double.tryParse(duracionController.text.replaceAll(',', '.')) ?? 0;
+                  if (duracion <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Ingrese una duración aproximada mayor a 0.'),
+                      ),
+                    );
+                    return;
+                  }
+
                   widget.presupuesto.descripcion = descripcionController.text.trim();
                   widget.presupuesto.ubicacion = ubicacionController.text.trim();
                   widget.presupuesto.clienteNombre = clienteController.text.trim();
                   widget.presupuesto.telefono = telefonoController.text.trim();
                   widget.presupuesto.fechaInicio = fechaInicio;
+                  widget.presupuesto.duracionAproximada = duracion;
+                  widget.presupuesto.unidadDuracion = unidadDuracionActual;
+                  widget.presupuesto.notasAdicionales = notasController.text.trim().isEmpty
+                      ? null
+                      : notasController.text.trim();
 
                   Navigator.push(
                     context,

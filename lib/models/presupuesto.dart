@@ -8,6 +8,9 @@ class Presupuesto {
   String? clienteNombre;
   String? telefono;
   DateTime? fechaInicio;
+  double? duracionAproximada;
+  String? unidadDuracion;
+  String? notasAdicionales;
   double transporte;
 
   final List<ManoObraItem> manoObra;
@@ -20,6 +23,9 @@ class Presupuesto {
     this.clienteNombre,
     this.telefono,
     this.fechaInicio,
+    this.duracionAproximada,
+    this.unidadDuracion,
+    this.notasAdicionales,
     this.transporte = 0.0,
     List<ManoObraItem>? manoObra,
     List<MaterialItem>? materiales,
