@@ -3,10 +3,60 @@ import 'package:flutter/material.dart';
 import '../models/presupuesto.dart';
 import '../services/pdf_generator.dart';
 
-class ResumenPresupuestoPage extends StatelessWidget {
+class ResumenPresupuestoPage extends StatefulWidget {
   final Presupuesto presupuesto;
 
   const ResumenPresupuestoPage({super.key, required this.presupuesto});
+
+  @override
+  State<ResumenPresupuestoPage> createState() => _ResumenPresupuestoPageState();
+}
+
+class _ResumenPresupuestoPageState extends State<ResumenPresupuestoPage> {
+  bool _isGenerating = false;
+  bool _isSharing = false;
+
+  Future<void> _handleGeneratePdf() async {
+    setState(() => _isGenerating = true);
+    try {
+      await PdfGenerator.generateAndViewPresupuestoPdf(widget.presupuesto);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al generar PDF: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGenerating = false);
+      }
+    }
+  }
+
+  Future<void> _handleSharePdf() async {
+    setState(() => _isSharing = true);
+    try {
+      await PdfGenerator.sharePresupuestoPdf(widget.presupuesto);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al compartir PDF: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,23 +73,23 @@ class ResumenPresupuestoPage extends StatelessWidget {
             children: [
               const Text('DATOS DEL TRABAJO', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('Tipo de trabajo: ${presupuesto.tipoTrabajo}'),
-              Text('Descripción: ${presupuesto.descripcion ?? '-'}'),
-              Text('Ubicación: ${presupuesto.ubicacion ?? '-'}'),
-              Text('Cliente: ${presupuesto.clienteNombre ?? '-'}'),
-              Text('Teléfono: ${presupuesto.telefono ?? '-'}'),
-              Text('Fecha inicio: ${presupuesto.fechaInicio != null ? '${presupuesto.fechaInicio!.day}/${presupuesto.fechaInicio!.month}/${presupuesto.fechaInicio!.year}' : '-'}'),
-              Text('Duración aproximada: ${presupuesto.duracionAproximada != null && presupuesto.duracionAproximada! > 0 ? '${presupuesto.duracionAproximada! % 1 == 0 ? presupuesto.duracionAproximada!.toStringAsFixed(0) : presupuesto.duracionAproximada!.toStringAsFixed(2)} ${presupuesto.unidadDuracion ?? 'Días'}' : '-'}'),
-              if ((presupuesto.notasAdicionales ?? '').trim().isNotEmpty)
-                Text('Notas adicionales: ${presupuesto.notasAdicionales}'),
+              Text('Tipo de trabajo: ${widget.presupuesto.tipoTrabajo}'),
+              Text('Descripción: ${widget.presupuesto.descripcion ?? '-'}'),
+              Text('Ubicación: ${widget.presupuesto.ubicacion ?? '-'}'),
+              Text('Cliente: ${widget.presupuesto.clienteNombre ?? '-'}'),
+              Text('Teléfono: ${widget.presupuesto.telefono ?? '-'}'),
+              Text('Fecha inicio: ${widget.presupuesto.fechaInicio != null ? '${widget.presupuesto.fechaInicio!.day}/${widget.presupuesto.fechaInicio!.month}/${widget.presupuesto.fechaInicio!.year}' : '-'}'),
+              Text('Duración aproximada: ${widget.presupuesto.duracionAproximada != null && widget.presupuesto.duracionAproximada! > 0 ? '${widget.presupuesto.duracionAproximada! % 1 == 0 ? widget.presupuesto.duracionAproximada!.toStringAsFixed(0) : widget.presupuesto.duracionAproximada!.toStringAsFixed(2)} ${widget.presupuesto.unidadDuracion ?? 'Días'}' : '-'}'),
+              if ((widget.presupuesto.notasAdicionales ?? '').trim().isNotEmpty)
+                Text('Notas adicionales: ${widget.presupuesto.notasAdicionales}'),
               const SizedBox(height: 16),
 
               const Text('MANO DE OBRA', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              presupuesto.manoObra.isEmpty
+              widget.presupuesto.manoObra.isEmpty
                   ? const Text('- No hay mano de obra agregada -')
                   : Column(
-                      children: presupuesto.manoObra.map((m) {
+                      children: widget.presupuesto.manoObra.map((m) {
                         return ListTile(
                           title: Text(m.descripcion),
                           subtitle: Text('Función: ${m.tipo} • Días: ${m.dias} • Precio/día: \$${m.precioDia.toStringAsFixed(2)}'),
@@ -48,15 +98,15 @@ class ResumenPresupuestoPage extends StatelessWidget {
                       }).toList(),
                     ),
               const SizedBox(height: 8),
-              Text('Total mano de obra: \$${presupuesto.totalManoObra.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('Total mano de obra: \$${widget.presupuesto.totalManoObra.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
 
               const Text('MATERIALES', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              presupuesto.materiales.isEmpty
+              widget.presupuesto.materiales.isEmpty
                   ? const Text('- No hay materiales agregados -')
                   : Column(
-                      children: presupuesto.materiales.map((mat) {
+                      children: widget.presupuesto.materiales.map((mat) {
                         return ListTile(
                           title: Text(mat.nombre),
                           subtitle: Text('Cantidad: ${mat.cantidad} • Unidad/Precio: \$${mat.precio.toStringAsFixed(2)}'),
@@ -65,10 +115,10 @@ class ResumenPresupuestoPage extends StatelessWidget {
                       }).toList(),
                     ),
               const SizedBox(height: 8),
-              Text('Total materiales: \$${presupuesto.totalMateriales.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('Total materiales: \$${widget.presupuesto.totalMateriales.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
 
-              if (presupuesto.fotosTrabajo.isNotEmpty) ...[
+              if (widget.presupuesto.fotosTrabajo.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 const Text('FOTOS DEL TRABAJO', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
@@ -76,9 +126,9 @@ class ResumenPresupuestoPage extends StatelessWidget {
                   height: 110,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: presupuesto.fotosTrabajo.length,
+                    itemCount: widget.presupuesto.fotosTrabajo.length,
                     itemBuilder: (context, index) {
-                      final path = presupuesto.fotosTrabajo[index];
+                      final path = widget.presupuesto.fotosTrabajo[index];
                       return Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: ClipRRect(
@@ -98,23 +148,52 @@ class ResumenPresupuestoPage extends StatelessWidget {
               const SizedBox(height: 16),
               const Text('RESUMEN ECONÓMICO', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('Total mano de obra: \$${presupuesto.totalManoObra.toStringAsFixed(2)}'),
-              Text('Total materiales: \$${presupuesto.totalMateriales.toStringAsFixed(2)}'),
-              Text('Transporte / Flete: \$${presupuesto.transporte.toStringAsFixed(2)}'),
+              Text('Total mano de obra: \$${widget.presupuesto.totalManoObra.toStringAsFixed(2)}'),
+              Text('Total materiales: \$${widget.presupuesto.totalMateriales.toStringAsFixed(2)}'),
+              Text('Transporte / Flete: \$${widget.presupuesto.transporte.toStringAsFixed(2)}'),
               const SizedBox(height: 8),
-              Text('TOTAL GENERAL: \$${presupuesto.totalGeneral.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
+              Text('TOTAL GENERAL: \$${widget.presupuesto.totalGeneral.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => PdfGenerator.generateAndSharePresupuestoPdf(presupuesto),
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('GENERAR PDF'),
+                  onPressed: _isGenerating ? null : _handleGeneratePdf,
+                  icon: _isGenerating
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.picture_as_pdf),
+                  label: Text(_isGenerating ? 'GENERANDO...' : 'GENERAR PDF'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    disabledBackgroundColor: Colors.grey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isSharing ? null : _handleSharePdf,
+                  icon: _isSharing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.share),
+                  label: Text(_isSharing ? 'COMPARTIENDO...' : 'COMPARTIR PRESUPUESTO'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    disabledBackgroundColor: Colors.grey,
                   ),
                 ),
               ),
@@ -126,3 +205,4 @@ class ResumenPresupuestoPage extends StatelessWidget {
     );
   }
 }
+

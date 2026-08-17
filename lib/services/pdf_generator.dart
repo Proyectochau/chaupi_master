@@ -5,7 +5,8 @@ import 'package:printing/printing.dart';
 import '../models/presupuesto.dart';
 
 class PdfGenerator {
-  static Future<void> generateAndSharePresupuestoPdf(Presupuesto presupuesto) async {
+  /// Construye el documento PDF con el contenido del presupuesto
+  static pw.Document _buildPresupuestoPdfDocument(Presupuesto presupuesto) {
     final pdf = pw.Document();
 
     // Agregar página al PDF
@@ -357,9 +358,33 @@ class PdfGenerator {
       );
     }
 
+    return pdf;
+  }
+
+  /// Genera y visualiza el presupuesto en PDF
+  static Future<void> generateAndViewPresupuestoPdf(Presupuesto presupuesto) async {
+    final pdf = _buildPresupuestoPdfDocument(presupuesto);
+
     // Mostrar el PDF
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
     );
   }
+
+  /// Genera el presupuesto en PDF y lo comparte a través de las aplicaciones disponibles
+  static Future<void> sharePresupuestoPdf(Presupuesto presupuesto) async {
+    try {
+      final pdf = _buildPresupuestoPdfDocument(presupuesto);
+      final pdfBytes = await pdf.save();
+
+      // Compartir usando Printing.sharePdf
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'presupuesto_chaupi_master.pdf',
+      );
+    } catch (e) {
+      throw Exception('Error al generar o compartir el presupuesto: $e');
+    }
+  }
 }
+
