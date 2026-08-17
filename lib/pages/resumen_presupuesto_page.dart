@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/presupuesto.dart';
+import '../services/pdf_generator.dart';
 
 class ResumenPresupuestoPage extends StatelessWidget {
   final Presupuesto presupuesto;
@@ -102,6 +103,22 @@ class ResumenPresupuestoPage extends StatelessWidget {
               Text('Transporte / Flete: \$${presupuesto.transporte.toStringAsFixed(2)}'),
               const SizedBox(height: 8),
               Text('TOTAL GENERAL: \$${presupuesto.totalGeneral.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => PdfGenerator.generateAndSharePresupuestoPdf(presupuesto),
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('GENERAR PDF'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
