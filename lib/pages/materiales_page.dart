@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/material.dart';
 import '../models/presupuesto.dart';
+import '../services/presupuesto_storage.dart';
 import 'resumen_presupuesto_page.dart';
 
 class MaterialesPage extends StatefulWidget {
@@ -159,13 +160,17 @@ class _MaterialesPageState extends State<MaterialesPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
+                onPressed: widget.presupuesto == null
+                    ? null
+                    : () async {
+                        await PresupuestoStorage().guardar(widget.presupuesto!);
+                        if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Presupuesto guardado correctamente'),
                     ),
                   );
-                },
+                      },
                 icon: const Icon(Icons.save),
                 label: const Text('GUARDAR PRESUPUESTO'),
               ),

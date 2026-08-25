@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'pages/mano_obra_page.dart';
 import 'models/presupuesto.dart';
 import 'pages/ferreterias_page.dart';
+import 'pages/historial_trabajos_page.dart';
 void main() {
   runApp(const ChaupiMasterApp());
 }
@@ -69,6 +70,14 @@ class WelcomePage extends StatelessWidget {
     icon: Icons.history_outlined,
     title: 'Historial de trabajos',
     subtitle: 'Revisa clientes, obras y presupuestos anteriores.',
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const HistorialTrabajosPage(),
+        ),
+      );
+    },
   ),
   const SizedBox(height: 12),
   _ActionCard(
