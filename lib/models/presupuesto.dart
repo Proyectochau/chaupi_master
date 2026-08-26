@@ -2,6 +2,8 @@ import 'mano_obra.dart';
 import 'material.dart';
 
 class Presupuesto {
+  String? id;
+  DateTime? fechaActualizacion;
   String tipoTrabajo;
   String? descripcion;
   String? ubicacion;
@@ -19,6 +21,8 @@ class Presupuesto {
 
   Presupuesto({
     required this.tipoTrabajo,
+    this.id,
+    this.fechaActualizacion,
     this.descripcion,
     this.ubicacion,
     this.clienteNombre,
@@ -36,6 +40,9 @@ class Presupuesto {
         materiales = materiales ?? [];
 
   Map<String, dynamic> toJson() => {
+    if (id != null) 'id': id,
+    if (fechaActualizacion != null)
+      'fechaActualizacion': fechaActualizacion!.toIso8601String(),
         'tipoTrabajo': tipoTrabajo,
         'descripcion': descripcion,
         'ubicacion': ubicacion,
@@ -53,6 +60,10 @@ class Presupuesto {
 
   factory Presupuesto.fromJson(Map<String, dynamic> json) => Presupuesto(
         tipoTrabajo: json['tipoTrabajo'] as String,
+        id: json['id'] as String?,
+        fechaActualizacion: json['fechaActualizacion'] == null
+            ? null
+            : DateTime.parse(json['fechaActualizacion'] as String),
         descripcion: json['descripcion'] as String?,
         ubicacion: json['ubicacion'] as String?,
         clienteNombre: json['clienteNombre'] as String?,

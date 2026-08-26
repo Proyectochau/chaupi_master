@@ -180,6 +180,24 @@ class _MaterialesPageState extends State<MaterialesPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await PresupuestoStorage().guardarBorrador(widget.presupuesto!);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Borrador guardado correctamente'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.save_outlined),
+                  label: const Text('GUARDAR BORRADOR'),
+                ),
+              ),
+            const SizedBox(height: 12),
+            if (widget.presupuesto != null)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.push(
                       context,
