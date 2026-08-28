@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/presupuesto.dart';
+import '../models/solicitud_materiales.dart';
 import '../services/pdf_generator.dart';
+import '../services/solicitud_materiales_storage.dart';
 
 class ResumenPresupuestoPage extends StatefulWidget {
   final Presupuesto presupuesto;
@@ -15,6 +17,7 @@ class ResumenPresupuestoPage extends StatefulWidget {
 class _ResumenPresupuestoPageState extends State<ResumenPresupuestoPage> {
   bool _isGenerating = false;
   bool _isSharing = false;
+  bool _isSavingSolicitud = false;
 
   Future<void> _handleGeneratePdf() async {
     setState(() => _isGenerating = true);
@@ -54,6 +57,51 @@ class _ResumenPresupuestoPageState extends State<ResumenPresupuestoPage> {
     } finally {
       if (mounted) {
         setState(() => _isSharing = false);
+      }
+    }
+  }
+
+  Future<void> _handleSolicitarProformas() async {
+    if (widget.presupuesto.materiales.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Agrega materiales al presupuesto antes de solicitar proformas'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSavingSolicitud = true);
+    try {
+      final ahora = DateTime.now();
+      final presupuestoId = widget.presupuesto.id ??
+          'presupuesto_${ahora.microsecondsSinceEpoch}';
+      widget.presupuesto.id ??= presupuestoId;
+
+      final solicitud = SolicitudMateriales(
+        id: 'solicitud_${ahora.microsecondsSinceEpoch}',
+        presupuestoId: presupuestoId,
+        nombre: 'Solicitud de proformas - ${widget.presupuesto.tipoTrabajo}',
+        fechaCreacion: ahora,
+        materiales: widget.presupuesto.materiales,
+        estado: EstadoSolicitudMateriales.pendiente,
+      );
+
+      await SolicitudMaterialesStorage().guardar(solicitud);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Solicitud de proformas guardada correctamente'),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar la solicitud: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingSolicitud = false);
       }
     }
   }
@@ -190,6 +238,30 @@ class _ResumenPresupuestoPageState extends State<ResumenPresupuestoPage> {
                   label: Text(_isSharing ? 'COMPARTIENDO...' : 'COMPARTIR PRESUPUESTO'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    disabledBackgroundColor: Colors.grey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isSavingSolicitud ? null : _handleSolicitarProformas,
+                  icon: _isSavingSolicitud
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.request_quote),
+                  label: Text(
+                    _isSavingSolicitud ? 'GUARDANDO...' : 'SOLICITAR PROFORMAS',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
