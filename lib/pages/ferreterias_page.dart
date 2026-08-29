@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/ferreteria.dart';
 import 'ferreteria_detail_page.dart';
+import 'solicitudes_ferreteria_page.dart';
 
 class FerreteriasPage extends StatefulWidget {
   const FerreteriasPage({super.key});
@@ -70,51 +71,73 @@ class _FerreteriasPageState extends State<FerreteriasPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: ListView.builder(
-          itemCount: ferreterias.length,
-          itemBuilder: (context, index) {
-            final f = ferreterias[index];
-            return Card(
-              elevation: 2,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                onTap: () {
+        child: Column(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FerreteriaDetailPage(ferreteria: f),
+                      builder: (_) => const SolicitudesFerreteriaPage(),
                     ),
                   );
                 },
-                leading: f.destacada
-                    ? Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'DESTACADA',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      )
-                    : const Icon(Icons.storefront_outlined),
-                title: Text(
-                  f.nombre,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(f.sector),
-                    const SizedBox(height: 4),
-                    Text(f.telefono),
-                  ],
-                ),
-                trailing: const Icon(Icons.chevron_right),
+                icon: const Icon(Icons.request_quote_outlined),
+                label: const Text('SOLICITUDES DE PROFORMA'),
               ),
-            );
-          },
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: ListView.builder(
+                itemCount: ferreterias.length,
+                itemBuilder: (context, index) {
+                  final f = ferreterias[index];
+                  return Card(
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FerreteriaDetailPage(ferreteria: f),
+                          ),
+                        );
+                      },
+                      leading: f.destacada
+                          ? Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.orange,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'DESTACADA',
+                                style: TextStyle(color: Colors.white, fontSize: 12),
+                              ),
+                            )
+                          : const Icon(Icons.storefront_outlined),
+                      title: Text(
+                        f.nombre,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(f.sector),
+                          const SizedBox(height: 4),
+                          Text(f.telefono),
+                        ],
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
