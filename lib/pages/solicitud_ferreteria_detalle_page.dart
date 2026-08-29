@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/solicitud_materiales.dart';
+import '../services/solicitud_materiales_storage.dart';
+import 'responder_proforma_page.dart';
 
 String _codigoSolicitud(String id) {
   final limpio = id.replaceAll(RegExp(r'[^A-Za-z0-9]'), '').toUpperCase();
@@ -21,10 +23,36 @@ String _codigoSolicitud(String id) {
   return codigo.substring(0, 4);
 }
 
-class SolicitudFerreteriaDetallePage extends StatelessWidget {
+class SolicitudFerreteriaDetallePage extends StatefulWidget {
   final SolicitudMateriales solicitud;
 
   const SolicitudFerreteriaDetallePage({super.key, required this.solicitud});
+
+  @override
+  State<SolicitudFerreteriaDetallePage> createState() => _SolicitudFerreteriaDetallePageState();
+}
+
+class _SolicitudFerreteriaDetallePageState extends State<SolicitudFerreteriaDetallePage> {
+  late SolicitudMateriales solicitud;
+
+  @override
+  void initState() {
+    super.initState();
+    solicitud = widget.solicitud;
+  }
+
+  Future<void> _recargarSolicitud() async {
+    final solicitudes = await SolicitudMaterialesStorage().obtenerTodos();
+    final encontrada = solicitudes.firstWhere(
+      (item) => item.id == solicitud.id,
+      orElse: () => solicitud,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      solicitud = encontrada;
+    });
+  }
 
   String _formatFecha(DateTime fecha) {
     final fechaLocal = fecha.toLocal();
@@ -66,6 +94,23 @@ class SolicitudFerreteriaDetallePage extends StatelessWidget {
             _InfoRow(label: 'Fecha', value: _formatFecha(solicitud.fechaCreacion)),
             const SizedBox(height: 8),
             _InfoRow(label: 'Estado', value: _estadoTexto(solicitud.estado)),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ResponderProformaPage(solicitud: solicitud),
+                    ),
+                  );
+                  await _recargarSolicitud();
+                },
+                icon: const Icon(Icons.reply_all),
+                label: const Text('RESPONDER PROFORMA'),
+              ),
+            ),
             const SizedBox(height: 20),
             const Text(
               'Materiales solicitados',
