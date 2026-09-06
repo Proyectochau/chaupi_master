@@ -17,8 +17,13 @@ class ResponderProformaPage extends StatefulWidget {
 class _ResponderProformaPageState extends State<ResponderProformaPage> {
   final ProformaFerreteriaStorage _storage = ProformaFerreteriaStorage();
   final TextEditingController _costoEntregaController = TextEditingController();
-  final TextEditingController _tiempoEntregaController = TextEditingController();
-  final TextEditingController _observacionesController = TextEditingController();
+  final TextEditingController _tiempoEntregaController =
+      TextEditingController();
+  final TextEditingController _observacionesController =
+      TextEditingController();
+  final TextEditingController _ferreteriaController = TextEditingController(
+    text: 'Ferretería actual',
+  );
 
   late final List<ProformaFerreteriaItem> _items;
 
@@ -43,6 +48,7 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
     _costoEntregaController.dispose();
     _tiempoEntregaController.dispose();
     _observacionesController.dispose();
+    _ferreteriaController.dispose();
     super.dispose();
   }
 
@@ -67,7 +73,9 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
     if (!_isValido()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Completa el stock y el precio ofertado de cada material.'),
+          content: Text(
+            'Completa el stock y el precio ofertado de cada material.',
+          ),
         ),
       );
       return;
@@ -76,9 +84,14 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
     final proforma = ProformaFerreteria(
       id: 'proforma_${DateTime.now().microsecondsSinceEpoch}',
       solicitudId: widget.solicitud.id,
+      ferreteriaNombre: _ferreteriaController.text.trim().isEmpty
+          ? 'Ferretería sin identificar'
+          : _ferreteriaController.text.trim(),
       fechaRespuesta: DateTime.now(),
       items: _items,
-      costoEntrega: double.tryParse(_costoEntregaController.text.replaceAll(',', '.')) ?? 0,
+      costoEntrega:
+          double.tryParse(_costoEntregaController.text.replaceAll(',', '.')) ??
+          0,
       tiempoEntrega: _tiempoEntregaController.text.trim(),
       observaciones: _observacionesController.text.trim(),
       estado: 'enviada',
@@ -87,7 +100,9 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
     await _storage.guardar(proforma);
 
     final solicitudes = await SolicitudMaterialesStorage().obtenerTodos();
-    final index = solicitudes.indexWhere((item) => item.id == widget.solicitud.id);
+    final index = solicitudes.indexWhere(
+      (item) => item.id == widget.solicitud.id,
+    );
     if (index != -1) {
       solicitudes[index].estado = EstadoSolicitudMateriales.respondida;
       await SolicitudMaterialesStorage().actualizar(solicitudes[index]);
@@ -95,9 +110,7 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Proforma enviada correctamente.'),
-      ),
+      const SnackBar(content: Text('Proforma enviada correctamente.')),
     );
 
     if (mounted) {
@@ -154,7 +167,8 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
                                 if (!value) {
                                   item.cantidadDisponible = 0;
                                 } else {
-                                  item.cantidadDisponible = item.cantidadSolicitada;
+                                  item.cantidadDisponible =
+                                      item.cantidadSolicitada;
                                 }
                               });
                             },
@@ -162,26 +176,36 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
                         ],
                       ),
                       TextFormField(
-                        initialValue: item.cantidadDisponible.toStringAsFixed(0),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        initialValue: item.cantidadDisponible.toStringAsFixed(
+                          0,
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: const InputDecoration(
                           labelText: 'Cantidad disponible',
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (value) {
-                          item.cantidadDisponible = double.tryParse(value.replaceAll(',', '.')) ?? 0;
+                          item.cantidadDisponible =
+                              double.tryParse(value.replaceAll(',', '.')) ?? 0;
                         },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
-                        initialValue: item.precioUnitario > 0 ? item.precioUnitario.toString() : '',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        initialValue: item.precioUnitario > 0
+                            ? item.precioUnitario.toString()
+                            : '',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: const InputDecoration(
                           labelText: 'Precio unitario ofertado',
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (value) {
-                          item.precioUnitario = double.tryParse(value.replaceAll(',', '.')) ?? 0;
+                          item.precioUnitario =
+                              double.tryParse(value.replaceAll(',', '.')) ?? 0;
                         },
                       ),
                       const SizedBox(height: 12),
@@ -207,8 +231,18 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
             ),
             const SizedBox(height: 12),
             TextFormField(
+              controller: _ferreteriaController,
+              decoration: const InputDecoration(
+                labelText: 'Nombre de la ferretería',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
               controller: _costoEntregaController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Costo de entrega / flete',
                 border: OutlineInputBorder(),

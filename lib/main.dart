@@ -5,6 +5,8 @@ import 'pages/mano_obra_page.dart';
 import 'models/presupuesto.dart';
 import 'pages/ferreterias_page.dart';
 import 'pages/historial_trabajos_page.dart';
+import 'pages/solicitudes_maestro_page.dart';
+
 void main() {
   runApp(const ChaupiMasterApp());
 }
@@ -32,67 +34,60 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chaupi Master'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Chaupi Master'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-  const SizedBox(height: 10),
-  const Text(
-    'Bienvenido',
-    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-  ),
-  const SizedBox(height: 8),
-  const Text(
-    'Tu asistente para presupuestos de construcción.',
-    style: TextStyle(fontSize: 16),
-  ),
-  const SizedBox(height: 24),
-  _ActionCard(
-    icon: Icons.calculate_outlined,
-    title: 'Crear presupuesto',
-    subtitle: 'Arma cotizaciones rápidas y ordenadas.',
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const CreateBudgetPage(),
-        ),
-      );
-    },
-  ),
-  const SizedBox(height: 12),
-  _ActionCard(
-    icon: Icons.history_outlined,
-    title: 'Historial de trabajos',
-    subtitle: 'Revisa clientes, obras y presupuestos anteriores.',
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const HistorialTrabajosPage(),
-        ),
-      );
-    },
-  ),
-  const SizedBox(height: 12),
-  _ActionCard(
-    icon: Icons.storefront_outlined,
-    title: 'Ferreterías y materiales',
-    subtitle: 'Busca proveedores y productos.',
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const FerreteriasPage(),
-        ),
-      );
-    },
-  ),
+            const SizedBox(height: 10),
+            const Text(
+              'Bienvenido',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tu asistente para presupuestos de construcción.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            _ActionCard(
+              icon: Icons.calculate_outlined,
+              title: 'Crear presupuesto',
+              subtitle: 'Arma cotizaciones rápidas y ordenadas.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateBudgetPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.history_outlined,
+              title: 'Historial de trabajos',
+              subtitle: 'Revisa clientes, obras y presupuestos anteriores.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const HistorialTrabajosPage(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.storefront_outlined,
+              title: 'Ferreterías y materiales',
+              subtitle: 'Busca proveedores y productos.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FerreteriasPage()),
+                );
+              },
+            ),
             const Spacer(),
             SizedBox(
               width: double.infinity,
@@ -100,9 +95,7 @@ class WelcomePage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const DashboardPage(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const DashboardPage()),
                   );
                 },
                 child: const Padding(
@@ -117,6 +110,7 @@ class WelcomePage extends StatelessWidget {
     );
   }
 }
+
 class CreateBudgetPage extends StatefulWidget {
   const CreateBudgetPage({super.key});
 
@@ -141,10 +135,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crear Presupuesto'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Crear Presupuesto'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -152,10 +143,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
           children: [
             const Text(
               'Seleccione el tipo de trabajo:',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 20),
@@ -167,10 +155,7 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
                 labelText: 'Tipo de trabajo',
               ),
               items: tiposTrabajo.map((String tipo) {
-                return DropdownMenuItem<String>(
-                  value: tipo,
-                  child: Text(tipo),
-                );
+                return DropdownMenuItem<String>(value: tipo, child: Text(tipo));
               }).toList(),
               onChanged: (nuevoTipo) {
                 setState(() {
@@ -182,39 +167,38 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
             const SizedBox(height: 30),
 
             SizedBox(
-  width: double.infinity,
-  child: ElevatedButton(
-    onPressed: tipoTrabajo == null
-        ? null
-        : () {
-            final presupuesto = Presupuesto(tipoTrabajo: tipoTrabajo!);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => DetalleTrabajoPage(
-                  presupuesto: presupuesto,
-                ),
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: tipoTrabajo == null
+                    ? null
+                    : () {
+                        final presupuesto = Presupuesto(
+                          tipoTrabajo: tipoTrabajo!,
+                        );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                DetalleTrabajoPage(presupuesto: presupuesto),
+                          ),
+                        );
+                      },
+                child: const Text('CONTINUAR'),
               ),
-            );
-          },
-    child: const Text('CONTINUAR'),
-  ),
-),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
 class DetalleTrabajoPage extends StatefulWidget {
   final Presupuesto presupuesto;
 
-  const DetalleTrabajoPage({
-    super.key,
-    required this.presupuesto,
-  });
-@override
-State<DetalleTrabajoPage> createState() => _DetalleTrabajoPageState();
+  const DetalleTrabajoPage({super.key, required this.presupuesto});
+  @override
+  State<DetalleTrabajoPage> createState() => _DetalleTrabajoPageState();
 }
 
 class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
@@ -238,7 +222,8 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
     ubicacionController.text = widget.presupuesto.ubicacion ?? '';
     clienteController.text = widget.presupuesto.clienteNombre ?? '';
     telefonoController.text = widget.presupuesto.telefono ?? '';
-    duracionController.text = widget.presupuesto.duracionAproximada?.toString() ?? '';
+    duracionController.text =
+        widget.presupuesto.duracionAproximada?.toString() ?? '';
     notasController.text = widget.presupuesto.notasAdicionales ?? '';
     unidadDuracionActual = widget.presupuesto.unidadDuracion ?? 'Días';
     fechaInicio = widget.presupuesto.fechaInicio;
@@ -302,10 +287,7 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
           children: [
             Text(
               'Trabajo: ${widget.presupuesto.tipoTrabajo}',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -345,10 +327,7 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Duración aproximada',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 8),
@@ -357,7 +336,9 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
                 Expanded(
                   child: TextField(
                     controller: duracionController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: const InputDecoration(
                       labelText: 'Cantidad',
                       border: OutlineInputBorder(),
@@ -375,7 +356,10 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
                     items: const [
                       DropdownMenuItem(value: 'Horas', child: Text('Horas')),
                       DropdownMenuItem(value: 'Días', child: Text('Días')),
-                      DropdownMenuItem(value: 'Semanas', child: Text('Semanas')),
+                      DropdownMenuItem(
+                        value: 'Semanas',
+                        child: Text('Semanas'),
+                      ),
                     ],
                     onChanged: (value) {
                       if (value != null) {
@@ -402,10 +386,7 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Fotos del trabajo (opcional)',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 12),
@@ -508,33 +489,42 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  final duracion = double.tryParse(duracionController.text.replaceAll(',', '.')) ?? 0;
+                  final duracion =
+                      double.tryParse(
+                        duracionController.text.replaceAll(',', '.'),
+                      ) ??
+                      0;
                   if (duracion <= 0) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Ingrese una duración aproximada mayor a 0.'),
+                        content: Text(
+                          'Ingrese una duración aproximada mayor a 0.',
+                        ),
                       ),
                     );
                     return;
                   }
 
-                  widget.presupuesto.descripcion = descripcionController.text.trim();
-                  widget.presupuesto.ubicacion = ubicacionController.text.trim();
-                  widget.presupuesto.clienteNombre = clienteController.text.trim();
+                  widget.presupuesto.descripcion = descripcionController.text
+                      .trim();
+                  widget.presupuesto.ubicacion = ubicacionController.text
+                      .trim();
+                  widget.presupuesto.clienteNombre = clienteController.text
+                      .trim();
                   widget.presupuesto.telefono = telefonoController.text.trim();
                   widget.presupuesto.fechaInicio = fechaInicio;
                   widget.presupuesto.duracionAproximada = duracion;
                   widget.presupuesto.unidadDuracion = unidadDuracionActual;
-                  widget.presupuesto.notasAdicionales = notasController.text.trim().isEmpty
+                  widget.presupuesto.notasAdicionales =
+                      notasController.text.trim().isEmpty
                       ? null
                       : notasController.text.trim();
 
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ManoObraPage(
-                        presupuesto: widget.presupuesto,
-                      ),
+                      builder: (_) =>
+                          ManoObraPage(presupuesto: widget.presupuesto),
                     ),
                   );
                 },
@@ -547,16 +537,14 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
     );
   }
 }
+
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inicio'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Inicio'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -588,6 +576,20 @@ class DashboardPage extends StatelessWidget {
               title: 'Presupuestos',
               subtitle: 'Crea y revisa cotizaciones.',
             ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.request_quote_outlined,
+              title: 'Mis solicitudes de proforma',
+              subtitle: 'Consulta respuestas y compara ferreterías.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SolicitudesMaestroPage(),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -601,12 +603,12 @@ class _ActionCard extends StatelessWidget {
   final String subtitle;
   final VoidCallback? onTap;
 
- const _ActionCard({
-  required this.icon,
-  required this.title,
-  required this.subtitle,
-  this.onTap,
-});
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -615,10 +617,7 @@ class _ActionCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         leading: Icon(icon, size: 32),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle),
       ),
     );

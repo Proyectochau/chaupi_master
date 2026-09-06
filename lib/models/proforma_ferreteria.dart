@@ -16,13 +16,13 @@ class ProformaFerreteriaItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'materialNombre': materialNombre,
-        'cantidadSolicitada': cantidadSolicitada,
-        'tieneStock': tieneStock,
-        'cantidadDisponible': cantidadDisponible,
-        'precioUnitario': precioUnitario,
-        'observacion': observacion,
-      };
+    'materialNombre': materialNombre,
+    'cantidadSolicitada': cantidadSolicitada,
+    'tieneStock': tieneStock,
+    'cantidadDisponible': cantidadDisponible,
+    'precioUnitario': precioUnitario,
+    'observacion': observacion,
+  };
 
   factory ProformaFerreteriaItem.fromJson(Map<String, dynamic> json) {
     return ProformaFerreteriaItem(
@@ -39,6 +39,7 @@ class ProformaFerreteriaItem {
 class ProformaFerreteria {
   final String id;
   final String solicitudId;
+  final String ferreteriaNombre;
   final DateTime fechaRespuesta;
   final List<ProformaFerreteriaItem> items;
   final double costoEntrega;
@@ -49,6 +50,7 @@ class ProformaFerreteria {
   ProformaFerreteria({
     required this.id,
     required this.solicitudId,
+    this.ferreteriaNombre = '',
     required this.fechaRespuesta,
     List<ProformaFerreteriaItem>? items,
     this.costoEntrega = 0,
@@ -58,23 +60,31 @@ class ProformaFerreteria {
   }) : items = items ?? [];
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'solicitudId': solicitudId,
-        'fechaRespuesta': fechaRespuesta.toIso8601String(),
-        'items': items.map((item) => item.toJson()).toList(),
-        'costoEntrega': costoEntrega,
-        'tiempoEntrega': tiempoEntrega,
-        'observaciones': observaciones,
-        'estado': estado,
-      };
+    'id': id,
+    'solicitudId': solicitudId,
+    'ferreteriaNombre': ferreteriaNombre,
+    'fechaRespuesta': fechaRespuesta.toIso8601String(),
+    'items': items.map((item) => item.toJson()).toList(),
+    'costoEntrega': costoEntrega,
+    'tiempoEntrega': tiempoEntrega,
+    'observaciones': observaciones,
+    'estado': estado,
+  };
 
   factory ProformaFerreteria.fromJson(Map<String, dynamic> json) {
     return ProformaFerreteria(
       id: json['id'] as String? ?? '',
       solicitudId: json['solicitudId'] as String? ?? '',
-      fechaRespuesta: DateTime.parse(json['fechaRespuesta'] as String? ?? DateTime.now().toIso8601String()),
+      ferreteriaNombre: json['ferreteriaNombre'] as String? ?? '',
+      fechaRespuesta: DateTime.parse(
+        json['fechaRespuesta'] as String? ?? DateTime.now().toIso8601String(),
+      ),
       items: (json['items'] as List? ?? [])
-          .map((item) => ProformaFerreteriaItem.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) => ProformaFerreteriaItem.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
           .toList(),
       costoEntrega: (json['costoEntrega'] as num?)?.toDouble() ?? 0,
       tiempoEntrega: json['tiempoEntrega'] as String? ?? '',
