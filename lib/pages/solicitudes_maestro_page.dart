@@ -114,20 +114,28 @@ class _SolicitudesMaestroPageState extends State<SolicitudesMaestroPage> {
                 final respondida =
                     respuestas.isNotEmpty ||
                     solicitud.estado == EstadoSolicitudMateriales.respondida;
+                final pedidoConfirmado =
+                    solicitud.estado ==
+                    EstadoSolicitudMateriales.pedidoConfirmado;
                 final seleccionada =
                     solicitud.proformaSeleccionadaId != null &&
-                    solicitud.estado ==
-                        EstadoSolicitudMateriales.proformaSeleccionada;
+                    (solicitud.estado ==
+                            EstadoSolicitudMateriales.proformaSeleccionada ||
+                        pedidoConfirmado);
 
                 return Card(
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     leading: CircleAvatar(
-                      backgroundColor: respondida
+                      backgroundColor: pedidoConfirmado
+                          ? Colors.green.shade200
+                          : respondida
                           ? Colors.green.shade100
                           : Colors.orange.shade100,
                       child: Icon(
-                        respondida
+                        pedidoConfirmado
+                            ? Icons.shopping_cart_checkout
+                            : respondida
                             ? Icons.mark_email_read_outlined
                             : Icons.hourglass_empty,
                         color: respondida
@@ -147,7 +155,9 @@ class _SolicitudesMaestroPageState extends State<SolicitudesMaestroPage> {
                           Text('Materiales: ${solicitud.materiales.length}'),
                           const SizedBox(height: 4),
                           Text(
-                            'Estado: ${seleccionada
+                            'Estado: ${pedidoConfirmado
+                                ? 'Pedido confirmado'
+                                : seleccionada
                                 ? 'Proforma seleccionada'
                                 : respondida
                                 ? 'Respondida'

@@ -24,6 +24,7 @@ class _SolicitudMaestroDetallePageState
   late SolicitudMateriales solicitud;
   bool _confirmandoSeleccion = false;
   bool _guardandoSeleccion = false;
+  bool _confirmandoPedido = false;
 
   @override
   void initState() {
@@ -44,8 +45,22 @@ class _SolicitudMaestroDetallePageState
     return nombre.isEmpty ? 'Ferretería sin identificar' : nombre;
   }
 
+  bool get _pedidoConfirmado =>
+      solicitud.estado == EstadoSolicitudMateriales.pedidoConfirmado;
+
+  ProformaFerreteria? get _proformaSeleccionada {
+    final id = solicitud.proformaSeleccionadaId;
+    if (id == null) return null;
+    for (final proforma in widget.proformas) {
+      if (proforma.id == id) return proforma;
+    }
+    return null;
+  }
+
   Future<void> _seleccionarProforma(ProformaFerreteria proforma) async {
-    if (_confirmandoSeleccion || _guardandoSeleccion) return;
+    if (_pedidoConfirmado || _confirmandoSeleccion || _guardandoSeleccion) {
+      return;
+    }
 
     setState(() => _confirmandoSeleccion = true);
     final total = _total(proforma);
@@ -97,6 +112,58 @@ class _SolicitudMaestroDetallePageState
     setState(() => _guardandoSeleccion = false);
   }
 
+  Future<void> _confirmarPedido() async {
+    final proforma = _proformaSeleccionada;
+    if (proforma == null || _pedidoConfirmado || _confirmandoPedido) return;
+
+    setState(() => _confirmandoPedido = true);
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar pedido'),
+        content: Text(
+          'Ferretería: ${_ferreteria(proforma)}\n'
+          'Total elegido: \$${_total(proforma).toStringAsFixed(2)}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() => _confirmandoPedido = false);
+    if (confirmado != true || _pedidoConfirmado) return;
+
+    final estadoAnterior = solicitud.estado;
+    final fechaAnterior = solicitud.fechaPedidoConfirmado;
+    solicitud.estado = EstadoSolicitudMateriales.pedidoConfirmado;
+    solicitud.fechaPedidoConfirmado = DateTime.now();
+    final guardada = await SolicitudMaterialesStorage().actualizar(solicitud);
+
+    if (!mounted) return;
+    if (!guardada) {
+      solicitud.estado = estadoAnterior;
+      solicitud.fechaPedidoConfirmado = fechaAnterior;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo confirmar el pedido.')),
+      );
+      return;
+    }
+
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Pedido confirmado correctamente.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final respuestas = [...widget.proformas]
@@ -104,7 +171,8 @@ class _SolicitudMaestroDetallePageState
     final respondida =
         respuestas.isNotEmpty ||
         solicitud.estado == EstadoSolicitudMateriales.respondida ||
-        solicitud.estado == EstadoSolicitudMateriales.proformaSeleccionada;
+        solicitud.estado == EstadoSolicitudMateriales.proformaSeleccionada ||
+        _pedidoConfirmado;
 
     return Scaffold(
       appBar: AppBar(
@@ -119,7 +187,13 @@ class _SolicitudMaestroDetallePageState
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text('Estado: ${respondida ? 'Respondida' : 'Pendiente'}'),
+          Text(
+            'Estado: ${_pedidoConfirmado
+                ? 'Pedido confirmado'
+                : respondida
+                ? 'Respondida'
+                : 'Pendiente'}',
+          ),
           const SizedBox(height: 20),
           const Text(
             'Materiales solicitados',
@@ -162,10 +236,34 @@ class _SolicitudMaestroDetallePageState
                 ferreteria: _ferreteria(entry.value),
                 seleccionada:
                     solicitud.proformaSeleccionadaId == entry.value.id,
-                bloqueada: _confirmandoSeleccion || _guardandoSeleccion,
+                bloqueada:
+                    _pedidoConfirmado ||
+                    _confirmandoSeleccion ||
+                    _guardandoSeleccion,
                 onSeleccionar: () => _seleccionarProforma(entry.value),
               ),
             ),
+            if (_proformaSeleccionada != null) ...[
+              const SizedBox(height: 4),
+              if (_pedidoConfirmado)
+                const SizedBox(
+                  width: double.infinity,
+                  child: Chip(
+                    avatar: Icon(Icons.check_circle),
+                    label: Text('PEDIDO CONFIRMADO'),
+                    backgroundColor: Colors.greenAccent,
+                  ),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _confirmandoPedido ? null : _confirmarPedido,
+                    icon: const Icon(Icons.shopping_cart_checkout),
+                    label: const Text('CONFIRMAR PEDIDO'),
+                  ),
+                ),
+            ],
           ],
         ],
       ),

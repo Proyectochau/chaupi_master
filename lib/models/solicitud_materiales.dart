@@ -6,6 +6,7 @@ enum EstadoSolicitudMateriales {
   enviada,
   respondida,
   proformaSeleccionada,
+  pedidoConfirmado,
   cancelada,
 }
 
@@ -17,6 +18,7 @@ class SolicitudMateriales {
   final List<MaterialItem> materiales;
   EstadoSolicitudMateriales estado;
   String? proformaSeleccionadaId;
+  DateTime? fechaPedidoConfirmado;
 
   SolicitudMateriales({
     required this.id,
@@ -26,6 +28,7 @@ class SolicitudMateriales {
     List<MaterialItem>? materiales,
     this.estado = EstadoSolicitudMateriales.borrador,
     this.proformaSeleccionadaId,
+    this.fechaPedidoConfirmado,
   }) : materiales = materiales ?? [];
 
   Map<String, dynamic> toJson() => {
@@ -36,6 +39,7 @@ class SolicitudMateriales {
     'materiales': materiales.map((item) => item.toJson()).toList(),
     'estado': estado.name,
     'proformaSeleccionadaId': proformaSeleccionadaId,
+    'fechaPedidoConfirmado': fechaPedidoConfirmado?.toIso8601String(),
   };
 
   factory SolicitudMateriales.fromJson(Map<String, dynamic> json) {
@@ -58,6 +62,9 @@ class SolicitudMateriales {
           .toList(),
       estado: estado,
       proformaSeleccionadaId: json['proformaSeleccionadaId'] as String?,
+      fechaPedidoConfirmado: json['fechaPedidoConfirmado'] == null
+          ? null
+          : DateTime.tryParse(json['fechaPedidoConfirmado'] as String),
     );
   }
 }

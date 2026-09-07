@@ -73,6 +73,8 @@ class _SolicitudFerreteriaDetallePageState
         return 'Respondida';
       case EstadoSolicitudMateriales.proformaSeleccionada:
         return 'Proforma seleccionada';
+      case EstadoSolicitudMateriales.pedidoConfirmado:
+        return 'Pedido confirmado';
       case EstadoSolicitudMateriales.cancelada:
         return 'Cancelada';
     }
@@ -102,21 +104,50 @@ class _SolicitudFerreteriaDetallePageState
             const SizedBox(height: 8),
             _InfoRow(label: 'Estado', value: _estadoTexto(solicitud.estado)),
             const SizedBox(height: 20),
+            if (solicitud.estado ==
+                EstadoSolicitudMateriales.pedidoConfirmado) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                color: Colors.green.shade100,
+                child: const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'PEDIDO CONFIRMADO',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          ResponderProformaPage(solicitud: solicitud),
-                    ),
-                  );
-                  await _recargarSolicitud();
-                },
+                onPressed:
+                    solicitud.estado ==
+                        EstadoSolicitudMateriales.pedidoConfirmado
+                    ? null
+                    : () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ResponderProformaPage(solicitud: solicitud),
+                          ),
+                        );
+                        await _recargarSolicitud();
+                      },
                 icon: const Icon(Icons.reply_all),
-                label: const Text('RESPONDER PROFORMA'),
+                label: Text(
+                  solicitud.estado == EstadoSolicitudMateriales.pedidoConfirmado
+                      ? 'PEDIDO CONFIRMADO'
+                      : 'RESPONDER PROFORMA',
+                ),
               ),
             ),
             const SizedBox(height: 20),

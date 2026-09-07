@@ -57,6 +57,8 @@ class _SolicitudesFerreteriaPageState extends State<SolicitudesFerreteriaPage> {
         return 'Respondida';
       case EstadoSolicitudMateriales.proformaSeleccionada:
         return 'Proforma seleccionada';
+      case EstadoSolicitudMateriales.pedidoConfirmado:
+        return 'Pedido confirmado';
       case EstadoSolicitudMateriales.cancelada:
         return 'Cancelada';
     }

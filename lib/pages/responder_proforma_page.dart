@@ -104,7 +104,10 @@ class _ResponderProformaPageState extends State<ResponderProformaPage> {
       (item) => item.id == widget.solicitud.id,
     );
     if (index != -1) {
-      solicitudes[index].estado = EstadoSolicitudMateriales.respondida;
+      if (solicitudes[index].estado !=
+          EstadoSolicitudMateriales.pedidoConfirmado) {
+        solicitudes[index].estado = EstadoSolicitudMateriales.respondida;
+      }
       await SolicitudMaterialesStorage().actualizar(solicitudes[index]);
     }
 
