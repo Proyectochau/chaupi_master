@@ -216,20 +216,27 @@ class _ProformaCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     ferreteria,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                if (seleccionada)
-                  const Chip(
-                    label: Text('PROFORMA SELECCIONADA'),
-                    avatar: Icon(Icons.check, size: 16),
-                    backgroundColor: Colors.greenAccent,
-                  ),
               ],
             ),
+            if (seleccionada) ...[
+              const SizedBox(height: 8),
+              const SizedBox(
+                width: double.infinity,
+                child: Chip(
+                  label: Text('PROFORMA SELECCIONADA'),
+                  avatar: Icon(Icons.check, size: 16),
+                  backgroundColor: Colors.greenAccent,
+                ),
+              ),
+            ],
             const Divider(height: 24),
             ...proforma.items.map(
               (item) => Padding(
