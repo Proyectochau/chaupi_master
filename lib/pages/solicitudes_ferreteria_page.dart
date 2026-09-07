@@ -27,7 +27,8 @@ class SolicitudesFerreteriaPage extends StatefulWidget {
   const SolicitudesFerreteriaPage({super.key});
 
   @override
-  State<SolicitudesFerreteriaPage> createState() => _SolicitudesFerreteriaPageState();
+  State<SolicitudesFerreteriaPage> createState() =>
+      _SolicitudesFerreteriaPageState();
 }
 
 class _SolicitudesFerreteriaPageState extends State<SolicitudesFerreteriaPage> {
@@ -54,6 +55,8 @@ class _SolicitudesFerreteriaPageState extends State<SolicitudesFerreteriaPage> {
         return 'Enviada';
       case EstadoSolicitudMateriales.respondida:
         return 'Respondida';
+      case EstadoSolicitudMateriales.proformaSeleccionada:
+        return 'Proforma seleccionada';
       case EstadoSolicitudMateriales.cancelada:
         return 'Cancelada';
     }
@@ -77,7 +80,9 @@ class _SolicitudesFerreteriaPageState extends State<SolicitudesFerreteriaPage> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: Text('No se pudieron cargar las solicitudes: ${snapshot.error}'),
+                child: Text(
+                  'No se pudieron cargar las solicitudes: ${snapshot.error}',
+                ),
               ),
             );
           }
@@ -90,7 +95,9 @@ class _SolicitudesFerreteriaPageState extends State<SolicitudesFerreteriaPage> {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: Text('Todavía no hay solicitudes de proforma recibidas.'),
+                child: Text(
+                  'Todavía no hay solicitudes de proforma recibidas.',
+                ),
               ),
             );
           }
@@ -108,7 +115,9 @@ class _SolicitudesFerreteriaPageState extends State<SolicitudesFerreteriaPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SolicitudFerreteriaDetallePage(solicitud: solicitud),
+                        builder: (_) => SolicitudFerreteriaDetallePage(
+                          solicitud: solicitud,
+                        ),
                       ),
                     );
                   },

@@ -29,10 +29,12 @@ class SolicitudFerreteriaDetallePage extends StatefulWidget {
   const SolicitudFerreteriaDetallePage({super.key, required this.solicitud});
 
   @override
-  State<SolicitudFerreteriaDetallePage> createState() => _SolicitudFerreteriaDetallePageState();
+  State<SolicitudFerreteriaDetallePage> createState() =>
+      _SolicitudFerreteriaDetallePageState();
 }
 
-class _SolicitudFerreteriaDetallePageState extends State<SolicitudFerreteriaDetallePage> {
+class _SolicitudFerreteriaDetallePageState
+    extends State<SolicitudFerreteriaDetallePage> {
   late SolicitudMateriales solicitud;
 
   @override
@@ -69,6 +71,8 @@ class _SolicitudFerreteriaDetallePageState extends State<SolicitudFerreteriaDeta
         return 'Enviada';
       case EstadoSolicitudMateriales.respondida:
         return 'Respondida';
+      case EstadoSolicitudMateriales.proformaSeleccionada:
+        return 'Proforma seleccionada';
       case EstadoSolicitudMateriales.cancelada:
         return 'Cancelada';
     }
@@ -91,7 +95,10 @@ class _SolicitudFerreteriaDetallePageState extends State<SolicitudFerreteriaDeta
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _InfoRow(label: 'Fecha', value: _formatFecha(solicitud.fechaCreacion)),
+            _InfoRow(
+              label: 'Fecha',
+              value: _formatFecha(solicitud.fechaCreacion),
+            ),
             const SizedBox(height: 8),
             _InfoRow(label: 'Estado', value: _estadoTexto(solicitud.estado)),
             const SizedBox(height: 20),
@@ -102,7 +109,8 @@ class _SolicitudFerreteriaDetallePageState extends State<SolicitudFerreteriaDeta
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ResponderProformaPage(solicitud: solicitud),
+                      builder: (_) =>
+                          ResponderProformaPage(solicitud: solicitud),
                     ),
                   );
                   await _recargarSolicitud();
@@ -138,7 +146,9 @@ class _SolicitudFerreteriaDetallePageState extends State<SolicitudFerreteriaDeta
                             children: [
                               Text(
                                 material.nombre,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Text('Cantidad solicitada: ${material.cantidad}'),

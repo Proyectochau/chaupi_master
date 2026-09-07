@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/proforma_ferreteria.dart';
 import '../models/solicitud_materiales.dart';
+import '../services/solicitud_materiales_storage.dart';
 
-class SolicitudMaestroDetallePage extends StatelessWidget {
+class SolicitudMaestroDetallePage extends StatefulWidget {
   final SolicitudMateriales solicitud;
   final List<ProformaFerreteria> proformas;
 
@@ -12,6 +13,23 @@ class SolicitudMaestroDetallePage extends StatelessWidget {
     required this.solicitud,
     required this.proformas,
   });
+
+  @override
+  State<SolicitudMaestroDetallePage> createState() =>
+      _SolicitudMaestroDetallePageState();
+}
+
+class _SolicitudMaestroDetallePageState
+    extends State<SolicitudMaestroDetallePage> {
+  late SolicitudMateriales solicitud;
+  bool _confirmandoSeleccion = false;
+  bool _guardandoSeleccion = false;
+
+  @override
+  void initState() {
+    super.initState();
+    solicitud = widget.solicitud;
+  }
 
   double _total(ProformaFerreteria proforma) {
     final materiales = proforma.items.fold<double>(
@@ -26,11 +44,67 @@ class SolicitudMaestroDetallePage extends StatelessWidget {
     return nombre.isEmpty ? 'Ferretería sin identificar' : nombre;
   }
 
+  Future<void> _seleccionarProforma(ProformaFerreteria proforma) async {
+    if (_confirmandoSeleccion || _guardandoSeleccion) return;
+
+    setState(() => _confirmandoSeleccion = true);
+    final total = _total(proforma);
+    final confirmada = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar selección'),
+        content: Text(
+          '${_ferreteria(proforma)}\n'
+          'Total: \$${total.toStringAsFixed(2)}\n\n'
+          'Esta será la propuesta elegida para esta solicitud.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('CONFIRMAR'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() => _confirmandoSeleccion = false);
+    if (confirmada != true || _guardandoSeleccion) return;
+
+    setState(() => _guardandoSeleccion = true);
+    final idAnterior = solicitud.proformaSeleccionadaId;
+    final estadoAnterior = solicitud.estado;
+    solicitud.proformaSeleccionadaId = proforma.id;
+    solicitud.estado = EstadoSolicitudMateriales.proformaSeleccionada;
+    final guardada = await SolicitudMaterialesStorage().actualizar(solicitud);
+
+    if (!mounted) return;
+    if (!guardada) {
+      solicitud.proformaSeleccionadaId = idAnterior;
+      solicitud.estado = estadoAnterior;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo guardar la selección.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Proforma seleccionada correctamente.')),
+      );
+    }
+    setState(() => _guardandoSeleccion = false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final respuestas = [...proformas]..sort((a, b) => _total(a).compareTo(_total(b)));
-    final respondida = respuestas.isNotEmpty ||
-        solicitud.estado == EstadoSolicitudMateriales.respondida;
+    final respuestas = [...widget.proformas]
+      ..sort((a, b) => _total(a).compareTo(_total(b)));
+    final respondida =
+        respuestas.isNotEmpty ||
+        solicitud.estado == EstadoSolicitudMateriales.respondida ||
+        solicitud.estado == EstadoSolicitudMateriales.proformaSeleccionada;
 
     return Scaffold(
       appBar: AppBar(
@@ -86,6 +160,10 @@ class SolicitudMaestroDetallePage extends StatelessWidget {
                 posicion: entry.key + 1,
                 total: _total(entry.value),
                 ferreteria: _ferreteria(entry.value),
+                seleccionada:
+                    solicitud.proformaSeleccionadaId == entry.value.id,
+                bloqueada: _confirmandoSeleccion || _guardandoSeleccion,
+                onSeleccionar: () => _seleccionarProforma(entry.value),
               ),
             ),
           ],
@@ -100,17 +178,31 @@ class _ProformaCard extends StatelessWidget {
   final int posicion;
   final double total;
   final String ferreteria;
+  final bool seleccionada;
+  final bool bloqueada;
+  final VoidCallback onSeleccionar;
 
   const _ProformaCard({
     required this.proforma,
     required this.posicion,
     required this.total,
     required this.ferreteria,
+    required this.seleccionada,
+    required this.bloqueada,
+    required this.onSeleccionar,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: seleccionada ? Colors.green.shade50 : null,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: seleccionada ? Colors.green : Colors.transparent,
+          width: seleccionada ? 2 : 0,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -119,17 +211,23 @@ class _ProformaCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  child: Text('$posicion'),
-                ),
+                CircleAvatar(radius: 16, child: Text('$posicion')),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     ferreteria,
-                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
+                if (seleccionada)
+                  const Chip(
+                    label: Text('PROFORMA SELECCIONADA'),
+                    avatar: Icon(Icons.check, size: 16),
+                    backgroundColor: Colors.greenAccent,
+                  ),
               ],
             ),
             const Divider(height: 24),
@@ -139,12 +237,17 @@ class _ProformaCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.materialNombre, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      item.materialNombre,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       'Cantidad: ${item.cantidadDisponible} de ${item.cantidadSolicitada}  |  Unitario: \$${item.precioUnitario.toStringAsFixed(2)}',
                     ),
-                    Text('Subtotal: \$${(item.cantidadDisponible * item.precioUnitario).toStringAsFixed(2)}'),
+                    Text(
+                      'Subtotal: \$${(item.cantidadDisponible * item.precioUnitario).toStringAsFixed(2)}',
+                    ),
                     if (item.observacion.trim().isNotEmpty)
                       Text('Observación: ${item.observacion}'),
                   ],
@@ -164,6 +267,21 @@ class _ProformaCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text('Observaciones: ${proforma.observaciones}'),
             ],
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: bloqueada ? null : onSeleccionar,
+                icon: Icon(
+                  seleccionada ? Icons.swap_horiz : Icons.check_circle_outline,
+                ),
+                label: Text(
+                  seleccionada
+                      ? 'CAMBIAR PROFORMA SELECCIONADA'
+                      : 'SELECCIONAR PROFORMA',
+                ),
+              ),
+            ),
           ],
         ),
       ),

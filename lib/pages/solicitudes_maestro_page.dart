@@ -6,6 +6,19 @@ import '../services/proforma_ferreteria_storage.dart';
 import '../services/solicitud_materiales_storage.dart';
 import 'solicitud_maestro_detalle_page.dart';
 
+double _totalProforma(ProformaFerreteria proforma) {
+  final materiales = proforma.items.fold<double>(
+    0,
+    (total, item) => total + (item.cantidadDisponible * item.precioUnitario),
+  );
+  return materiales + proforma.costoEntrega;
+}
+
+String _nombreFerreteria(ProformaFerreteria proforma) {
+  final nombre = proforma.ferreteriaNombre.trim();
+  return nombre.isEmpty ? 'Ferretería sin identificar' : nombre;
+}
+
 class SolicitudesMaestroPage extends StatefulWidget {
   const SolicitudesMaestroPage({super.key});
 
@@ -60,7 +73,9 @@ class _SolicitudesMaestroPageState extends State<SolicitudesMaestroPage> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: Text('No se pudieron cargar las solicitudes: ${snapshot.error}'),
+                child: Text(
+                  'No se pudieron cargar las solicitudes: ${snapshot.error}',
+                ),
               ),
             );
           }
@@ -89,17 +104,35 @@ class _SolicitudesMaestroPageState extends State<SolicitudesMaestroPage> {
                 final respuestas = data.proformas
                     .where((proforma) => proforma.solicitudId == solicitud.id)
                     .toList();
-                final respondida = respuestas.isNotEmpty ||
+                final proformaSeleccionada = respuestas
+                    .cast<ProformaFerreteria?>()
+                    .firstWhere(
+                      (proforma) =>
+                          proforma?.id == solicitud.proformaSeleccionadaId,
+                      orElse: () => null,
+                    );
+                final respondida =
+                    respuestas.isNotEmpty ||
                     solicitud.estado == EstadoSolicitudMateriales.respondida;
+                final seleccionada =
+                    solicitud.proformaSeleccionadaId != null &&
+                    solicitud.estado ==
+                        EstadoSolicitudMateriales.proformaSeleccionada;
 
                 return Card(
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     leading: CircleAvatar(
-                      backgroundColor: respondida ? Colors.green.shade100 : Colors.orange.shade100,
+                      backgroundColor: respondida
+                          ? Colors.green.shade100
+                          : Colors.orange.shade100,
                       child: Icon(
-                        respondida ? Icons.mark_email_read_outlined : Icons.hourglass_empty,
-                        color: respondida ? Colors.green.shade800 : Colors.orange.shade800,
+                        respondida
+                            ? Icons.mark_email_read_outlined
+                            : Icons.hourglass_empty,
+                        color: respondida
+                            ? Colors.green.shade800
+                            : Colors.orange.shade800,
                       ),
                     ),
                     title: Text(
@@ -113,7 +146,20 @@ class _SolicitudesMaestroPageState extends State<SolicitudesMaestroPage> {
                         children: [
                           Text('Materiales: ${solicitud.materiales.length}'),
                           const SizedBox(height: 4),
-                          Text('Estado: ${respondida ? 'Respondida' : 'Pendiente'}'),
+                          Text(
+                            'Estado: ${seleccionada
+                                ? 'Proforma seleccionada'
+                                : respondida
+                                ? 'Respondida'
+                                : 'Pendiente'}',
+                          ),
+                          if (proformaSeleccionada != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Elegida: ${_nombreFerreteria(proformaSeleccionada)} - '
+                              '\$${_totalProforma(proformaSeleccionada).toStringAsFixed(2)}',
+                            ),
+                          ],
                           if (respuestas.length > 1) ...[
                             const SizedBox(height: 4),
                             Text('Respuestas: ${respuestas.length}'),
