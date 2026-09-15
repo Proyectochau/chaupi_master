@@ -8,22 +8,103 @@ import 'dart:convert';
 import 'package:chaupi_master/models/proforma_ferreteria.dart';
 import 'package:chaupi_master/pages/solicitud_maestro_detalle_page.dart';
 import 'package:chaupi_master/services/solicitud_materiales_storage.dart';
+import 'package:chaupi_master/services/profile_storage.dart';
+import 'package:chaupi_master/pages/profile_selection_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('Chaupi Master inicia correctamente', (
     WidgetTester tester,
   ) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(const ChaupiMasterApp());
 
     expect(find.text('Chaupi Master'), findsOneWidget);
+  });
+
+  testWidgets('Dashboard abre Crear presupuesto', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: DashboardPage()));
+
+    await tester.tap(find.text('Crear presupuesto'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Crear Presupuesto'), findsOneWidget);
+  });
+
+  testWidgets('La selección muestra logo y publicidad de prueba', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProfileSelectionPage(
+          maestroPageBuilder: (_) => const SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    expect(find.byType(Image), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Publicidad'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Publicidad'), findsOneWidget);
+    expect(find.text('Ferretería El Constructor'), findsOneWidget);
+    expect(find.text('Materiales para tu obra cerca de ti'), findsOneWidget);
+    expect(find.text('Ver oferta'), findsOneWidget);
+    await tester.tap(find.text('Ver oferta'));
+    await tester.pump();
+    expect(find.text('Anuncio de prueba'), findsOneWidget);
+  });
+
+  testWidgets('Un perfil se guarda y Cambiar perfil vuelve al selector', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProfileSelectionPage(
+          maestroPageBuilder: (_) => const DashboardPage(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Soy Maestro o Profesional'));
+    await tester.pumpAndSettle();
+
+    expect(await ProfileStorage().loadProfileId(), 'maestro_profesional');
+    await tester.tap(find.byTooltip('Cambiar perfil'));
+    await tester.pumpAndSettle();
+    expect(find.text('Elige cómo usarás Chaupi Master'), findsOneWidget);
+  });
+
+  test('Guardar el perfil no elimina datos existentes', () async {
+    SharedPreferences.setMockInitialValues({
+      'solicitudes_materiales_guardadas': 'datos existentes',
+    });
+
+    await ProfileStorage().saveProfileId('ferreteria');
+    final preferences = await SharedPreferences.getInstance();
+
+    expect(
+      preferences.getString('solicitudes_materiales_guardadas'),
+      'datos existentes',
+    );
+    expect(preferences.getString(ProfileStorage.profileKey), 'ferreteria');
   });
 
   testWidgets('La pantalla de solicitudes de ferretería renderiza el título', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(home: SolicitudesFerreteriaPage()),
+      MaterialApp(
+        home: SolicitudesFerreteriaPage(
+          maestroPageBuilder: (_) => const SizedBox.shrink(),
+        ),
+      ),
     );
 
     expect(find.text('Solicitudes de proforma'), findsOneWidget);

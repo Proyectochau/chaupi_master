@@ -6,6 +6,8 @@ import 'models/presupuesto.dart';
 import 'pages/ferreterias_page.dart';
 import 'pages/historial_trabajos_page.dart';
 import 'pages/solicitudes_maestro_page.dart';
+import 'pages/profile_selection_page.dart';
+import 'widgets/test_ad_banner.dart';
 
 void main() {
   runApp(const ChaupiMasterApp());
@@ -23,7 +25,7 @@ class ChaupiMasterApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const WelcomePage(),
+      home: AppStartPage(maestroPageBuilder: (_) => const DashboardPage()),
     );
   }
 }
@@ -35,10 +37,9 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Chaupi Master'), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
           children: [
             const SizedBox(height: 10),
             const Text(
@@ -88,7 +89,6 @@ class WelcomePage extends StatelessWidget {
                 );
               },
             ),
-            const Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -544,11 +544,27 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inicio'), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      appBar: AppBar(
+        title: const Text('Inicio'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Cambiar perfil',
+            icon: const Icon(Icons.switch_account_outlined),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProfileSelectionPage(
+                  maestroPageBuilder: (_) => const DashboardPage(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
           children: [
             const Text(
               'Panel principal',
@@ -558,6 +574,8 @@ class DashboardPage extends StatelessWidget {
             const Text(
               'Aquí construiremos las funciones principales de Chaupi Master.',
             ),
+            const SizedBox(height: 16),
+            const TestAdBanner(compact: true),
             const SizedBox(height: 24),
             _ActionCard(
               icon: Icons.person_outline,
@@ -573,8 +591,14 @@ class DashboardPage extends StatelessWidget {
             const SizedBox(height: 12),
             _ActionCard(
               icon: Icons.receipt_long_outlined,
-              title: 'Presupuestos',
+              title: 'Crear presupuesto',
               subtitle: 'Crea y revisa cotizaciones.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateBudgetPage()),
+                );
+              },
             ),
             const SizedBox(height: 12),
             _ActionCard(
