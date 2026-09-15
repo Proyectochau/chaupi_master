@@ -31,6 +31,39 @@ void main() {
     expect(find.text('Crear Presupuesto'), findsOneWidget);
   });
 
+  testWidgets('Dashboard abre Historial de trabajos', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: DashboardPage()));
+
+    await tester.scrollUntilVisible(
+      find.text('Historial de trabajos'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Historial de trabajos'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Historial de trabajos'), findsOneWidget);
+  });
+
+  testWidgets('Dashboard abre Ferreterías y materiales', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: DashboardPage()));
+
+    await tester.scrollUntilVisible(
+      find.text('Ferreterías y materiales'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ferreterías y materiales'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ferreterías'), findsOneWidget);
+  });
+
   testWidgets('La selección muestra logo y publicidad de prueba', (
     WidgetTester tester,
   ) async {

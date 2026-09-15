@@ -578,18 +578,6 @@ class DashboardPage extends StatelessWidget {
             const TestAdBanner(compact: true),
             const SizedBox(height: 24),
             _ActionCard(
-              icon: Icons.person_outline,
-              title: 'Clientes',
-              subtitle: 'Gestiona datos de clientes y contactos.',
-            ),
-            const SizedBox(height: 12),
-            _ActionCard(
-              icon: Icons.work_outline,
-              title: 'Proyectos',
-              subtitle: 'Organiza obras, avances y presupuesto.',
-            ),
-            const SizedBox(height: 12),
-            _ActionCard(
               icon: Icons.receipt_long_outlined,
               title: 'Crear presupuesto',
               subtitle: 'Crea y revisa cotizaciones.',
@@ -597,6 +585,20 @@ class DashboardPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const CreateBudgetPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.history_outlined,
+              title: 'Historial de trabajos',
+              subtitle: 'Revisa clientes, obras y presupuestos anteriores.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const HistorialTrabajosPage(),
+                  ),
                 );
               },
             ),
@@ -613,6 +615,30 @@ class DashboardPage extends StatelessWidget {
                   ),
                 );
               },
+            ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.storefront_outlined,
+              title: 'Ferreterías y materiales',
+              subtitle: 'Busca proveedores y productos.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FerreteriasPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.person_outline,
+              title: 'Clientes',
+              subtitle: 'Gestiona datos de clientes y contactos.',
+            ),
+            const SizedBox(height: 12),
+            _ActionCard(
+              icon: Icons.work_outline,
+              title: 'Proyectos',
+              subtitle: 'Organiza obras, avances y presupuesto.',
             ),
           ],
         ),
