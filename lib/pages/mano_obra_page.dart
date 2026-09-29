@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/mano_obra.dart';
 import '../models/presupuesto.dart';
+import '../widgets/test_ad_banner.dart';
 import 'materiales_page.dart';
 
 class ManoObraPage extends StatefulWidget {
@@ -29,7 +30,8 @@ class _ManoObraPageState extends State<ManoObraPage> {
     final descripcion = descripcionController.text.trim();
     final funcion = funcionController.text.trim();
     final dias = double.tryParse(diasController.text.replaceAll(',', '.')) ?? 0;
-    final precio = double.tryParse(precioController.text.replaceAll(',', '.')) ?? 0;
+    final precio =
+        double.tryParse(precioController.text.replaceAll(',', '.')) ?? 0;
 
     if (descripcion.isEmpty || funcion.isEmpty || dias <= 0 || precio <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,8 +85,12 @@ class _ManoObraPageState extends State<ManoObraPage> {
         title: const Text('Mano de obra / Cuadrilla'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: TestAdBanner(compact: true),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -142,7 +148,10 @@ class _ManoObraPageState extends State<ManoObraPage> {
                 labelText: 'Categoría',
               ),
               items: const [
-                DropdownMenuItem(value: 'Trabajador', child: Text('Trabajador')),
+                DropdownMenuItem(
+                  value: 'Trabajador',
+                  child: Text('Trabajador'),
+                ),
                 DropdownMenuItem(value: 'Chaupi', child: Text('Chaupi')),
                 DropdownMenuItem(value: 'Ayudante', child: Text('Ayudante')),
                 DropdownMenuItem(value: 'Otro', child: Text('Otro')),
@@ -174,34 +183,31 @@ class _ManoObraPageState extends State<ManoObraPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: integrantes.isEmpty
-                  ? const Center(
-                      child: Text('No hay integrantes agregados aún.'),
-                    )
-                  : ListView.builder(
-                      itemCount: integrantes.length,
-                      itemBuilder: (context, index) {
-                        final integrante = integrantes[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          child: ListTile(
-                            title: Text(integrante.descripcion),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Función: ${integrante.tipo}'),
-                                Text('Categoría: ${integrante.categoria}'),
-                                Text('Días: ${integrante.dias}'),
-                                Text('Precio/día: \$${integrante.precioDia.toStringAsFixed(2)}'),
-                                Text('Subtotal: \$${integrante.subtotal.toStringAsFixed(2)}'),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+            if (integrantes.isEmpty)
+              const Center(child: Text('No hay integrantes agregados aún.'))
+            else
+              ...integrantes.map(
+                (integrante) => Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    title: Text(integrante.descripcion),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Función: ${integrante.tipo}'),
+                        Text('Categoría: ${integrante.categoria}'),
+                        Text('Días: ${integrante.dias}'),
+                        Text(
+                          'Precio/día: \$${integrante.precioDia.toStringAsFixed(2)}',
+                        ),
+                        Text(
+                          'Subtotal: \$${integrante.subtotal.toStringAsFixed(2)}',
+                        ),
+                      ],
                     ),
-            ),
+                  ),
+                ),
+              ),
             const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
@@ -210,7 +216,8 @@ class _ManoObraPageState extends State<ManoObraPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => MaterialesPage(presupuesto: widget.presupuesto),
+                      builder: (_) =>
+                          MaterialesPage(presupuesto: widget.presupuesto),
                     ),
                   );
                 },

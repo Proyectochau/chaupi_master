@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../services/profile_storage.dart';
-import '../widgets/test_ad_banner.dart';
 import 'solicitudes_ferreteria_page.dart';
 
 class AppStartPage extends StatefulWidget {
@@ -209,8 +208,6 @@ class ProfileSelectionPage extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
-                const TestAdBanner(),
                 const SizedBox(height: 24),
                 Center(
                   child: TextButton(

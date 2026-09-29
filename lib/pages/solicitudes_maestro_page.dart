@@ -4,6 +4,7 @@ import '../models/proforma_ferreteria.dart';
 import '../models/solicitud_materiales.dart';
 import '../services/proforma_ferreteria_storage.dart';
 import '../services/solicitud_materiales_storage.dart';
+import '../widgets/test_ad_banner.dart';
 import 'solicitud_maestro_detalle_page.dart';
 
 double _totalProforma(ProformaFerreteria proforma) {
@@ -62,6 +63,10 @@ class _SolicitudesMaestroPageState extends State<SolicitudesMaestroPage> {
             tooltip: 'Actualizar',
           ),
         ],
+      ),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: TestAdBanner(compact: true),
       ),
       body: FutureBuilder<_SolicitudesMaestroData>(
         future: _dataFuture,

@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import '../models/material.dart';
 import '../models/presupuesto.dart';
 import '../services/presupuesto_storage.dart';
+import '../widgets/test_ad_banner.dart';
 import 'resumen_presupuesto_page.dart';
 
 class MaterialesPage extends StatefulWidget {
   final Presupuesto? presupuesto;
 
   const MaterialesPage({super.key, this.presupuesto});
-@override
-State<MaterialesPage> createState() => _MaterialesPageState();
+  @override
+  State<MaterialesPage> createState() => _MaterialesPageState();
 }
 
 class _MaterialesPageState extends State<MaterialesPage> {
@@ -39,7 +40,8 @@ class _MaterialesPageState extends State<MaterialesPage> {
   void initState() {
     super.initState();
     materiales = widget.presupuesto?.materiales ?? [];
-    transporteController.text = widget.presupuesto?.transporte.toString() ?? '0';
+    transporteController.text =
+        widget.presupuesto?.transporte.toString() ?? '0';
   }
 
   @override
@@ -54,12 +56,43 @@ class _MaterialesPageState extends State<MaterialesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Materiales'),
-        centerTitle: true,
+      appBar: AppBar(title: const Text('Materiales'), centerTitle: true),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: widget.presupuesto == null
+                      ? null
+                      : () async {
+                          await PresupuestoStorage().guardar(
+                            widget.presupuesto!,
+                          );
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Presupuesto guardado correctamente',
+                              ),
+                            ),
+                          );
+                        },
+                  icon: const Icon(Icons.save),
+                  label: const Text('GUARDAR PRESUPUESTO'),
+                ),
+              ),
+            ),
+            TestAdBanner(compact: true),
+          ],
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Column(
           children: [
             TextField(
@@ -97,11 +130,20 @@ class _MaterialesPageState extends State<MaterialesPage> {
                   setState(() {
                     final item = MaterialItem(
                       nombre: materialController.text,
-                      cantidad: double.tryParse(cantidadController.text.replaceAll(',', '.')) ?? 0,
-                      precio: double.tryParse(precioController.text.replaceAll(',', '.')) ?? 0,
+                      cantidad:
+                          double.tryParse(
+                            cantidadController.text.replaceAll(',', '.'),
+                          ) ??
+                          0,
+                      precio:
+                          double.tryParse(
+                            precioController.text.replaceAll(',', '.'),
+                          ) ??
+                          0,
                     );
                     materiales.add(item);
-                    if (widget.presupuesto != null && !widget.presupuesto!.materiales.contains(item)) {
+                    if (widget.presupuesto != null &&
+                        !widget.presupuesto!.materiales.contains(item)) {
                       widget.presupuesto!.materiales.add(item);
                     }
                   });
@@ -126,16 +168,15 @@ class _MaterialesPageState extends State<MaterialesPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Transporte / Flete',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: transporteController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               onChanged: (value) {
                 final parsed = double.tryParse(value.replaceAll(',', '.')) ?? 0;
                 if (widget.presupuesto != null) {
@@ -157,31 +198,15 @@ class _MaterialesPageState extends State<MaterialesPage> {
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: widget.presupuesto == null
-                    ? null
-                    : () async {
-                        await PresupuestoStorage().guardar(widget.presupuesto!);
-                        if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Presupuesto guardado correctamente'),
-                    ),
-                  );
-                      },
-                icon: const Icon(Icons.save),
-                label: const Text('GUARDAR PRESUPUESTO'),
-              ),
-            ),
             const SizedBox(height: 12),
             if (widget.presupuesto != null)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    await PresupuestoStorage().guardarBorrador(widget.presupuesto!);
+                    await PresupuestoStorage().guardarBorrador(
+                      widget.presupuesto!,
+                    );
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -202,7 +227,9 @@ class _MaterialesPageState extends State<MaterialesPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ResumenPresupuestoPage(presupuesto: widget.presupuesto!),
+                        builder: (_) => ResumenPresupuestoPage(
+                          presupuesto: widget.presupuesto!,
+                        ),
                       ),
                     );
                   },
@@ -211,24 +238,18 @@ class _MaterialesPageState extends State<MaterialesPage> {
                 ),
               ),
             const SizedBox(height: 20),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: materiales.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                    materiales[index].nombre,
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Cantidad: ${materiales[index].cantidad}'),
-                      Text('Precio: ${materiales[index].precio}'),
-                      Text('Subtotal: ${materiales[index].subtotal}'),
-                    ],
-                  ),
-                );
-              },
+            ...materiales.map(
+              (material) => ListTile(
+                title: Text(material.nombre),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Cantidad: ${material.cantidad}'),
+                    Text('Precio: ${material.precio}'),
+                    Text('Subtotal: ${material.subtotal}'),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

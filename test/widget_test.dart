@@ -64,7 +64,7 @@ void main() {
     expect(find.text('Ferreterías'), findsOneWidget);
   });
 
-  testWidgets('La selección muestra logo y publicidad de prueba', (
+  testWidgets('La selección muestra el logo sin publicidad', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -77,20 +77,10 @@ void main() {
 
     expect(find.byType(Image), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('Publicidad'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Publicidad'), findsOneWidget);
-    expect(find.text('Ferretería El Constructor'), findsOneWidget);
-    expect(find.text('Materiales para tu obra cerca de ti'), findsOneWidget);
-    expect(find.text('Ver oferta'), findsOneWidget);
-    await tester.tap(find.text('Ver oferta'));
-    await tester.pump();
-    expect(find.text('Anuncio de prueba'), findsOneWidget);
+    expect(find.text('Publicidad'), findsNothing);
+    expect(find.text('Ferretería El Constructor'), findsNothing);
+    expect(find.text('Materiales para tu obra cerca de ti'), findsNothing);
+    expect(find.text('Ver oferta'), findsNothing);
   });
 
   testWidgets('Un perfil se guarda y Cambiar perfil vuelve al selector', (

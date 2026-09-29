@@ -136,6 +136,10 @@ class _CreateBudgetPageState extends State<CreateBudgetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Crear Presupuesto'), centerTitle: true),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: TestAdBanner(compact: true),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -281,8 +285,12 @@ class _DetalleTrabajoPageState extends State<DetalleTrabajoPage> {
         title: const Text('Detalle del Trabajo'),
         centerTitle: true,
       ),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: TestAdBanner(compact: true),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
         child: Column(
           children: [
             Text(
@@ -575,7 +583,6 @@ class DashboardPage extends StatelessWidget {
               'Aquí construiremos las funciones principales de Chaupi Master.',
             ),
             const SizedBox(height: 16),
-            const TestAdBanner(compact: true),
             const SizedBox(height: 24),
             _ActionCard(
               icon: Icons.receipt_long_outlined,

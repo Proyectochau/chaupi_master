@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/solicitud_materiales.dart';
 import '../services/solicitud_materiales_storage.dart';
-import '../widgets/test_ad_banner.dart';
 import 'profile_selection_page.dart';
 import 'solicitud_ferreteria_detalle_page.dart';
 
@@ -91,104 +90,91 @@ class _SolicitudesFerreteriaPageState extends State<SolicitudesFerreteriaPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: TestAdBanner(compact: true),
-          ),
-          Expanded(
-            child: FutureBuilder<List<SolicitudMateriales>>(
-              future: _solicitudesFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: FutureBuilder<List<SolicitudMateriales>>(
+        future: _solicitudesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(
-                        'No se pudieron cargar las solicitudes: ${snapshot.error}',
-                      ),
-                    ),
-                  );
-                }
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'No se pudieron cargar las solicitudes: ${snapshot.error}',
+                ),
+              ),
+            );
+          }
 
-                final solicitudes = snapshot.data ?? [];
-                final solicitudesOrdenadas = [...solicitudes]
-                  ..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
+          final solicitudes = snapshot.data ?? [];
+          final solicitudesOrdenadas = [...solicitudes]
+            ..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
 
-                if (solicitudesOrdenadas.isEmpty) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text(
-                        'Todavía no hay solicitudes de proforma recibidas.',
-                      ),
-                    ),
-                  );
-                }
+          if (solicitudesOrdenadas.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  'Todavía no hay solicitudes de proforma recibidas.',
+                ),
+              ),
+            );
+          }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: solicitudesOrdenadas.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final solicitud = solicitudesOrdenadas[index];
-                    final codigoSolicitud = _codigoSolicitud(solicitud.id);
-                    return Card(
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => SolicitudFerreteriaDetallePage(
-                                solicitud: solicitud,
-                              ),
-                            ),
-                          );
-                        },
-                        contentPadding: const EdgeInsets.all(16),
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.blue.shade100,
-                          child: const Icon(
-                            Icons.request_quote,
-                            color: Colors.blue,
-                          ),
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: solicitudesOrdenadas.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final solicitud = solicitudesOrdenadas[index];
+              final codigoSolicitud = _codigoSolicitud(solicitud.id);
+              return Card(
+                child: ListTile(
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SolicitudFerreteriaDetallePage(
+                          solicitud: solicitud,
                         ),
-                        title: Text(
-                          'Solicitud #$codigoSolicitud',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Fecha: ${_formatFecha(solicitud.fechaCreacion)}',
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Materiales: ${solicitud.materiales.length}',
-                              ),
-                              const SizedBox(height: 4),
-                              Text('Estado: ${_estadoTexto(solicitud.estado)}'),
-                            ],
-                          ),
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
                       ),
                     );
+                    if (!mounted) return;
+                    setState(() {
+                      _solicitudesFuture =
+                          SolicitudMaterialesStorage().obtenerTodos();
+                    });
                   },
-                );
-              },
-            ),
-          ),
-        ],
+                  contentPadding: const EdgeInsets.all(16),
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue.shade100,
+                    child: const Icon(Icons.request_quote, color: Colors.blue),
+                  ),
+                  title: Text(
+                    'Solicitud #$codigoSolicitud',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Fecha: ${_formatFecha(solicitud.fechaCreacion)}'),
+                        const SizedBox(height: 4),
+                        Text('Materiales: ${solicitud.materiales.length}'),
+                        const SizedBox(height: 4),
+                        Text('Estado: ${_estadoTexto(solicitud.estado)}'),
+                      ],
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

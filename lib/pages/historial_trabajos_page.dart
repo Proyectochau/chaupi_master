@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/presupuesto.dart';
 import '../services/presupuesto_storage.dart';
+import '../widgets/test_ad_banner.dart';
 import 'resumen_presupuesto_page.dart';
 
 class HistorialTrabajosPage extends StatefulWidget {
@@ -27,6 +28,10 @@ class _HistorialTrabajosPageState extends State<HistorialTrabajosPage> {
         title: const Text('Historial de trabajos'),
         centerTitle: true,
       ),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: TestAdBanner(compact: true),
+      ),
       body: FutureBuilder<List<Presupuesto>>(
         future: _presupuestosFuture,
         builder: (context, snapshot) {
@@ -46,9 +51,11 @@ class _HistorialTrabajosPageState extends State<HistorialTrabajosPage> {
               final presupuesto = presupuestos[index];
               return Card(
                 child: ListTile(
-                  title: Text(presupuesto.clienteNombre?.isNotEmpty == true
-                      ? presupuesto.clienteNombre!
-                      : 'Cliente sin nombre'),
+                  title: Text(
+                    presupuesto.clienteNombre?.isNotEmpty == true
+                        ? presupuesto.clienteNombre!
+                        : 'Cliente sin nombre',
+                  ),
                   subtitle: Text(
                     'Trabajo: ${presupuesto.tipoTrabajo}\n'
                     'Ubicación: ${presupuesto.ubicacion?.isNotEmpty == true ? presupuesto.ubicacion : '-'}\n'
@@ -60,9 +67,8 @@ class _HistorialTrabajosPageState extends State<HistorialTrabajosPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ResumenPresupuestoPage(
-                          presupuesto: presupuesto,
-                        ),
+                        builder: (_) =>
+                            ResumenPresupuestoPage(presupuesto: presupuesto),
                       ),
                     );
                   },
